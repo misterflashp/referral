@@ -45,27 +45,27 @@ let transfer = (fromPrivateKey, toAddress, value, coinSymbol, cb) => {
         next(error, null);
       }
     }, (serializedTx, next) => {
-      /* web3.eth.sendRawTransaction(serializedTx,
+      web3.eth.sendRawTransaction(serializedTx,
         (error, txHash) => {
           if (error) next(error, null);
           else next(null, txHash);
-        }); */
-      cb(null, Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5));
+        });
+      // cb(null, Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5));
     }
   ], (error, txHash) => {
     cb(error, txHash);
   });
 };
 
-let getTx = (txHash, cb) => {
-  web3.eth.getTransaction(txHash,
-    (error, tx) => {
+let getTxReceipt = (txHash, cb) => {
+  web3.eth.getTransactionReceipt(txHash,
+    (error, receipt) => {
       if (error) cb(error, null);
-      else cb(null, tx);
+      else cb(null, receipt);
     });
 };
 
 module.exports = {
   transfer,
-  getTx
+  getTxReceipt
 };

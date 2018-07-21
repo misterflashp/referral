@@ -1,6 +1,6 @@
 let async = require('async');
 let referralDbo = require('../dbos/referral.dbo');
-let { getTx } = require('../helpers/eth.helper');
+let { getTxReceipt } = require('../helpers/eth.helper');
 let { transferAndUpdate } = require('../helpers/referral.helper');
 
 /**
@@ -230,16 +230,16 @@ let claimBonus = (req, res) => {
     }, (next) => {
       let { paymentTxHash } = details;
       if (paymentTxHash) {
-        getTx(paymentTxHash,
-          (error, tx) => {
+        getTxReceipt(paymentTxHash,
+          (error, receipt) => {
             if (error) next({
               status: 500,
               message: 'Error occurred while getting tx.'
             }, null);
-            else if (tx) next(null);
+            else if (receipt && receipt.status === 1) next(null);
             else next({
               status: 400,
-              message: 'Tx is not found.'
+              message: 'Tx receipt is not found or failed tx.'
             }, null);
           });
       } else next({
