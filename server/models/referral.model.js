@@ -7,9 +7,13 @@ let referralSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
-  referralAddress: {
+  referralId: {
     type: String,
-    required: true
+    required: true,
+  },
+  clientReferralId: {
+    type : String,
+    required:true
   },
   paymentTxHash: {
     type: String,

@@ -1,4 +1,5 @@
 let async = require('async');
+let crc = require('crc');
 let referralDbo = require('../dbos/referral.dbo');
 let { getTxReceipt } = require('../helpers/eth.helper');
 let { transferAndUpdate } = require('../helpers/referral.helper');
@@ -8,44 +9,31 @@ let { transferAndUpdate } = require('../helpers/referral.helper');
 * @apiName addReferral
 * @apiGroup Referral
 * @apiParam {String} clientAddress Address of client.
-  @apiParam {String} referralAddress Referrer address which is valid.
-* @apiError ClientAddressSameAsReferralAddress Client cannot add his own address as referral address
-* @apiErrorExample ClientAddressSameAsReferralAddress:
-* {
-*   success: false,
-*   message: 'Client address and Referral address should not be same.'
-* }
+  @apiParam {String} referralId Referral ID which is valid.
 * @apiError ClientAddressAlreadyExists Provided address already exists 
 * @apiErrorExample ClientAddressAlreadyExists-Response:
 * {
 *   success: false,
 *   message: 'Client address is already exists.'
 * }
-* @apiError ReferralAddressNotExists Provided referral address already exists 
-* @apiErrorExample ReferralAddressNotExists-Response:
+* @apiError ReferralIdNotExists Provided referral ID not exists 
+* @apiErrorExample ReferralIdNotExists-Response:
 * {
 *   success: false,
-*   message: 'Referral address is not exist.'
+*   message: 'Referral ID is not exist.'
 * }
 * @apiSuccessExample Response: 
 * {
 *   success: true,
-*   message: 'Referral address added successfully.'
+*   message: 'Referral ID added successfully.'
 * }
 */
 let addReferral = (req, res) => {
   let { clientAddress,
-    referralAddress } = req.body;
+    referralId } = req.body;
   clientAddress = clientAddress.toLowerCase();
-  referralAddress = referralAddress.toLowerCase();
   async.waterfall([
-    (next) => {
-      if (clientAddress === referralAddress) next({
-        status: 400,
-        message: 'Client address and Referral address should not be same.'
-      });
-      else next(null);
-    }, (next) => {
+     (next) => {
       referralDbo.getReferral(clientAddress,
         (error, referral) => {
           if (error) next({
@@ -59,22 +47,24 @@ let addReferral = (req, res) => {
           else next(null);
         });
     }, (next) => {
-      referralDbo.getReferral(referralAddress,
+      referralDbo.checkReferralId(referralId,
         (error, referral) => {
           if (error) next({
             status: 500,
-            message: 'Error occurred while checking referral address.'
+            message: 'Error occurred while checking referral ID.'
           }, null);
           else if (referral) next(null);
           else next({
             status: 400,
-            message: 'Referral address is not exist.'
+            message: 'Referral ID is not exist.'
           }, null);
         });
     }, (next) => {
+      let clientReferralId = (crc.crc32(Buffer.from(clientAddress, 'utf8'))).toString();
       referralDbo.addReferral({
+        clientReferralId,
         clientAddress,
-        referralAddress
+        referralId
       }, (error, result) => {
         console.log(error);
         if (error) next({
@@ -83,7 +73,7 @@ let addReferral = (req, res) => {
         }, null);
         else next(null, {
           status: 200,
-          message: 'Referral address added successfully.'
+          message: 'Referral ID added successfully.'
         });
       });
     }
@@ -102,11 +92,11 @@ let addReferral = (req, res) => {
 * @apiName getReferralInfo
 * @apiGroup Referral
 * @apiParam {String} address Address of client.
-* @apiError NoReferralAddressExists No one used this client address as referral address
-* @apiErrorExample NoReferralAddressExists-Response:
+* @apiError NoAddressExists No address exists.
+* @apiErrorExample NoAddressExists-Response:
 * {
 *   success: false,
-*   message: 'No referral address exists.'
+*   message: 'No address exists.'
 * }
 * @apiSuccess {Boolean} isClaimed Status of claim
 * @apiSuccess {Number} joinBonus Referral amount earned
@@ -132,20 +122,21 @@ let getReferralInfo = (req, res) => {
         (error, referral) => {
           if (error) next({
             status: 500,
-            message: 'Error occurred while checking referral address.'
+            message: 'Error occurred while checking referral .'
           }, null);
           else if (referral) next(null, referral);
           else next({
             status: 400,
-            message: 'No referral address exists.'
+            message: 'No address exists.'
           }, null);
         });
     }, (referral, next) => {
       let { clientTxHash,
-        clientAmount } = referral;
+        clientAmount,
+        clientReferralId } = referral;
       info.isClaimed = clientTxHash ? true : false;
       info.joinBonus = clientAmount;
-      referralDbo.getTotalReferralBonus(address,
+      referralDbo.getTotalReferralBonus(clientReferralId,
         (error, result) => {
           if (error) next({
             status: 500,
@@ -175,11 +166,11 @@ let getReferralInfo = (req, res) => {
 * @apiName claimBonus
 * @apiGroup Referral
 * @apiParam {String} address Address of client.
-* @apiError NoReferralAddressExists No one used this client address as referral address
-* @apiErrorExample NoReferralAddressExists-Response:
+* @apiError NoAddressExists No one used this client as referral 
+* @apiErrorExample NoAddressExists-Response:
 * {
 *   success: false,
-*   message: 'No referral address exists.'
+*   message: 'No address exists.'
 * }
 * @apiError BonusAlreadyClaimed Provided address already claimed for bonus 
 * @apiErrorExample BonusAlreadyClaimed-Response:
@@ -209,14 +200,14 @@ let claimBonus = (req, res) => {
         (error, referral) => {
           if (error) next({
             status: 500,
-            message: 'Error occurred while checking referral address.'
+            message: 'Error occurred while checking address.'
           }, null);
           else if (referral) {
             details = referral;
             next(null);
           } else next({
             status: 400,
-            message: 'No referral address exists.'
+            message: 'No address exists.'
           }, null);
         });
     }, (next) => {
@@ -248,7 +239,19 @@ let claimBonus = (req, res) => {
       }, null);
     }, (next) => {
       let { referralTxHash,
-        referralAddress } = details;
+        referralId } = details;
+        let referralAddress =null;
+        referralDbo.checkReferralId(referralId,(error,response)=>{
+          if(error){ 
+            next({
+            status: 500,
+            message: 'Error occurred while getting referralAddress.'
+          }, null);
+        }else{
+         referralAddress = response.clientAddress;
+        }
+      });
+
       if (!referralTxHash) transferAndUpdate(address, referralAddress,
         (error) => {
           if (error) next({

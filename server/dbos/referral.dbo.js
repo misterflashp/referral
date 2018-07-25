@@ -20,6 +20,18 @@ let getReferral = (clientAddress, cb) => {
     });
 };
 
+
+let checkReferralId = (referralId, cb) => {
+  ReferralModel.findOne({
+    'clientReferralId':referralId
+  }, {
+      '_id': 0
+    }, (error, result) => {
+      if (error) cb(error, null);
+      else cb(null, result);
+    });
+};
+
 let updateReferral = (clientAddress, updateObject, cb) => {
   ReferralModel.findOneAndUpdate({
     clientAddress
@@ -31,10 +43,10 @@ let updateReferral = (clientAddress, updateObject, cb) => {
     });
 };
 
-let getTotalReferralBonus = (address, cb) => {
+let getTotalReferralBonus = (clientReferralId, cb) => {
   ReferralModel.aggregate([{
     $match: {
-      'referralAddress': address
+      'referralId': clientReferralId
     }
   }, {
     $group: {
@@ -59,6 +71,7 @@ let getTotalReferralBonus = (address, cb) => {
 module.exports = {
   addReferral,
   getReferral,
+  checkReferralId,
   updateReferral,
   getTotalReferralBonus
 }
