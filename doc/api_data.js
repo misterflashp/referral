@@ -19,8 +19,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "referralAddress",
-            "description": "<p>Referrer address which is valid.</p>"
+            "field": "referralId",
+            "description": "<p>Referral ID which is valid.</p>"
           }
         ]
       }
@@ -31,37 +31,26 @@ define({ "api": [
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "ClientAddressSameAsReferralAddress",
-            "description": "<p>Client cannot add his own address as referral address</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
             "field": "ClientAddressAlreadyExists",
             "description": "<p>Provided address already exists</p>"
           },
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "ReferralAddressNotExists",
-            "description": "<p>Provided referral address already exists</p>"
+            "field": "ReferralIdNotExists",
+            "description": "<p>Provided referral ID not exists</p>"
           }
         ]
       },
       "examples": [
-        {
-          "title": "ClientAddressSameAsReferralAddress:",
-          "content": "{\n  success: false,\n  message: 'Client address and Referral address should not be same.'\n}",
-          "type": "json"
-        },
         {
           "title": "ClientAddressAlreadyExists-Response:",
           "content": "{\n  success: false,\n  message: 'Client address is already exists.'\n}",
           "type": "json"
         },
         {
-          "title": "ReferralAddressNotExists-Response:",
-          "content": "{\n  success: false,\n  message: 'Referral address is not exist.'\n}",
+          "title": "ReferralIdNotExists-Response:",
+          "content": "{\n  success: false,\n  message: 'Referral ID is not exist.'\n}",
           "type": "json"
         }
       ]
@@ -70,7 +59,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Response: ",
-          "content": "{\n  success: true,\n  message: 'Referral address added successfully.'\n}",
+          "content": "{\n  success: true,\n  message: 'Referral ID added successfully.'\n}",
           "type": "json"
         }
       ]
@@ -104,8 +93,8 @@ define({ "api": [
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "NoReferralAddressExists",
-            "description": "<p>No one used this client address as referral address</p>"
+            "field": "NoAddressExists",
+            "description": "<p>No one used this client as referral</p>"
           },
           {
             "group": "Error 4xx",
@@ -123,8 +112,8 @@ define({ "api": [
       },
       "examples": [
         {
-          "title": "NoReferralAddressExists-Response:",
-          "content": "{\n  success: false,\n  message: 'No referral address exists.'\n}",
+          "title": "NoAddressExists-Response:",
+          "content": "{\n  success: false,\n  message: 'No address exists.'\n}",
           "type": "json"
         },
         {
@@ -177,15 +166,15 @@ define({ "api": [
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "NoReferralAddressExists",
-            "description": "<p>No one used this client address as referral address</p>"
+            "field": "NoAddressExists",
+            "description": "<p>No address exists.</p>"
           }
         ]
       },
       "examples": [
         {
-          "title": "NoReferralAddressExists-Response:",
-          "content": "{\n  success: false,\n  message: 'No referral address exists.'\n}",
+          "title": "NoAddressExists-Response:",
+          "content": "{\n  success: false,\n  message: 'No address exists.'\n}",
           "type": "json"
         }
       ]

@@ -4,7 +4,7 @@ let joi = require('joi');
 let addReferral = (req, res, next) => {
   let addReferralSchema = joi.object().keys({
     clientAddress: joi.string().required(),
-    referralAddress: joi.string().required()
+    referralId: joi.string().required()
   });
   let { error } = joi.validate(req.body, addReferralSchema);
   if (error) res.status(422).send({
