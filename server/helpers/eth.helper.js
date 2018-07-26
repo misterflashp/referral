@@ -49,8 +49,7 @@ let transfer = (fromPrivateKey, toAddress, value, coinSymbol, cb) => {
         (error, txHash) => {
           if (error) next(error, null);
           else next(null, txHash);
-        });
-      // cb(null, Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5));
+        }); /* cb(null, Math.random().toString(36)); */
     }
   ], (error, txHash) => {
     cb(error, txHash);

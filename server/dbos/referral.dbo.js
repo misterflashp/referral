@@ -11,11 +11,11 @@ let addReferral = (details, cb) => {
 
 let getReferralInfo = (details, cb) => {
   ReferralModel.findOne(details, {
-      '_id': 0
-    }, (error, result) => {
-      if (error) cb(error, null);
-      else cb(null, result);
-    });
+    '_id': 0
+  }, (error, result) => {
+    if (error) cb(error, null);
+    else cb(null, result);
+  });
 };
 
 let updateReferral = (clientAddress, updateObject, cb) => {
