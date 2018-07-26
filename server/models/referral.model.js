@@ -12,8 +12,8 @@ let referralSchema = new mongoose.Schema({
     required: true,
   },
   clientReferralId: {
-    type : String,
-    required:true
+    type: String,
+    required: true
   },
   paymentTxHash: {
     type: String,
