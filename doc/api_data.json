@@ -81,8 +81,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "address",
-            "description": "<p>Address of client.</p>"
+            "field": "clientReferralId",
+            "description": "<p>Referral ID of client.</p>"
           }
         ]
       }
@@ -93,27 +93,27 @@
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "NoAddressExists",
-            "description": "<p>No one used this client as referral</p>"
+            "field": "NoReferralIdExists",
+            "description": "<p>No referral id exists</p>"
           },
           {
             "group": "Error 4xx",
             "optional": false,
             "field": "BonusAlreadyClaimed",
-            "description": "<p>Provided address already claimed for bonus</p>"
+            "description": "<p>Provided client already claimed for bonus</p>"
           },
           {
             "group": "Error 4xx",
             "optional": false,
             "field": "PaymentTxNotFound",
-            "description": "<p>Provided address not made first payment yet.</p>"
+            "description": "<p>Provided client not made first payment yet.</p>"
           }
         ]
       },
       "examples": [
         {
-          "title": "NoAddressExists-Response:",
-          "content": "{\n  success: false,\n  message: 'No address exists.'\n}",
+          "title": "NoReferralIdExists-Response:",
+          "content": "{\n  success: false,\n  message: 'No referral ID exists.'\n}",
           "type": "json"
         },
         {
@@ -154,8 +154,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "address",
-            "description": "<p>Address of client.</p>"
+            "field": "clientReferralId",
+            "description": "<p>Referral ID of client.</p>"
           }
         ]
       }
@@ -166,14 +166,14 @@
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "NoAddressExists",
-            "description": "<p>No address exists.</p>"
+            "field": "NoReferralIdExists",
+            "description": "<p>No referral id exists</p>"
           }
         ]
       },
       "examples": [
         {
-          "title": "NoAddressExists-Response:",
+          "title": "NoReferralIdExists-Response:",
           "content": "{\n  success: false,\n  message: 'No address exists.'\n}",
           "type": "json"
         }
@@ -208,7 +208,7 @@
       "examples": [
         {
           "title": "Response:",
-          "content": "{\n  success: true,\n  isClaimed: true,\n  joinBonus: 20000000000,\n  referral: {\n      count: 4,\n      amount: 40000000000\n  }\n}",
+          "content": "{\n  success: true,\n  isClaimed: true,\n  joinBonus: 20000000000,\n  clientReferralId: Referral ID\n  referral: {\n      count: 4,\n      amount: 40000000000\n  }\n}",
           "type": "json"
         }
       ]
