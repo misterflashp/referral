@@ -10,14 +10,14 @@ let transferAndUpdate = (address, toAddress, cb) => {
   let amount = address === toAddress ? CLIENT_BONUS : REFERRAL_BONUS;
   async.waterfall([
     (next) => {
-      transfer(COINBASE_PRIVATE_KEY, toAddress, amount, 'SENT',
+      /* transfer(COINBASE_PRIVATE_KEY, toAddress, amount, 'SENT',
         (error, txHash) => {
           if (error) next({
             code: 201,
             message: 'Error occurred while transfering bonus.'
           });
           else next(null, txHash);
-        });
+        }); */ next(null, Math.random().toString(36))
     }, (txHash, next) => {
       referralDbo.updateReferral(address,
         address === toAddress ? {

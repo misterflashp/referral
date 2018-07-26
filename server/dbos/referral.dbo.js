@@ -9,22 +9,8 @@ let addReferral = (details, cb) => {
   });
 };
 
-let getReferral = (clientAddress, cb) => {
-  ReferralModel.findOne({
-    clientAddress
-  }, {
-      '_id': 0
-    }, (error, result) => {
-      if (error) cb(error, null);
-      else cb(null, result);
-    });
-};
-
-
-let checkReferralId = (referralId, cb) => {
-  ReferralModel.findOne({
-    'clientReferralId':referralId
-  }, {
+let getReferralInfo = (details, cb) => {
+  ReferralModel.findOne(details, {
       '_id': 0
     }, (error, result) => {
       if (error) cb(error, null);
@@ -70,8 +56,7 @@ let getTotalReferralBonus = (clientReferralId, cb) => {
 
 module.exports = {
   addReferral,
-  getReferral,
-  checkReferralId,
+  getReferralInfo,
   updateReferral,
   getTotalReferralBonus
 }
