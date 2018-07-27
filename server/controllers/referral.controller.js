@@ -72,6 +72,7 @@ let addReferral = (req, res) => {
           message: 'Error occurred while adding referral address.'
         }, null);
         else next(null, {
+          referralId: clientReferralId,
           status: 200,
           message: 'Referral ID added successfully.'
         });
