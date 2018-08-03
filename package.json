@@ -21,6 +21,7 @@
     "glob": "^7.1.2",
     "joi": "^13.4.0",
     "jshashes": "^1.0.7",
+    "lodash": "^4.17.10",
     "method-override": "^3.0.0",
     "mongoose": "^5.2.5",
     "morgan": "^1.9.0",

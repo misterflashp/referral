@@ -45,11 +45,12 @@ let transfer = (fromPrivateKey, toAddress, value, coinSymbol, cb) => {
         next(error, null);
       }
     }, (serializedTx, next) => {
-      web3.eth.sendRawTransaction(serializedTx,
+      /*web3.eth.sendRawTransaction(serializedTx,
         (error, txHash) => {
           if (error) next(error, null);
           else next(null, txHash);
-        }); /* cb(null, Math.random().toString(36)); */
+        }); */
+       next(null, Math.random().toString(36));
     }
   ], (error, txHash) => {
     cb(error, txHash);
