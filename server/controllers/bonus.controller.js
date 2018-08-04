@@ -8,7 +8,6 @@ let bonusHelper = require('../helpers/bonus.helper');
 let bonusTransfer = (deviceId, bonuses, bonusType, address, cb) => {
   console.log(deviceId, bonuses, bonusType, address)
   let amount = lodash.sum(lodash.map(bonuses.filter((e) => !e.txHash), 'amount'));
-  console.log(amount);
   if (amount === 0) cb(null);
   else {
     async.waterfall([
@@ -47,6 +46,15 @@ let bonusesTransfer = (deviceId, bonusTypes, address, cb) => {
           });
           else next(null, bonuses);
         });
+    },(bonuses, next) => {
+      let amount = lodash.sum(lodash.map(bonuses.refBonusesInfo.filter((e) => !e.txHash), 'amount'));;
+      if (bonusTypes.indexOf('SNC') > -1) amount += lodash.sum(lodash.map(bonuses.sncBonusesInfo.filter((e) => !e.txHash), 'amount'));
+      if (bonusTypes.indexOf('SLC') > -1) amount += lodash.sum(lodash.map(bonuses.slcBonusesInfo.filter((e) => !e.txHash), 'amount'));
+      if(amount === 0) next({
+        status: 400,
+        message: 'Bonus already claimed OR no bonuses to claim.'
+      });
+      else next(null, bonuses);
     }, (bonuses, next) => {
       if (bonusTypes.indexOf('SNC') > -1) {
         let { sncBonusesInfo } = bonuses;
