@@ -8,7 +8,8 @@ let accountHelper = require('../helpers/account.helper');
 * @api {post} /account To add account.
 * @apiName addAccount
 * @apiGroup Account
-* @apiParam {String} deviceId device ID of client.
+* @apiParam {String} deviceId Device ID of client.
+* @apiParam {String} address Account address of client.
   @apiParam {String} referredBy Referral ID which is valid.
 * @apiError DeviceIdAlreadyExists Provided deviceId already exists 
 * @apiErrorExample DeviceIdAlreadyExists-Response:
@@ -109,7 +110,7 @@ let addAccount = (req, res) => {
 * @api {get} /account To get account information.
 * @apiName getAccount
 * @apiGroup Account
-* @apiParam {String} deviceId device ID of client.
+* @apiParam {String} deviceId Device ID of client.
 * @apiError DeviceNotRegistered Provided device ID not registered.
 * @apiErrorExample DeviceNotRegistered-Response:
 * {
@@ -120,12 +121,12 @@ let addAccount = (req, res) => {
 * {
 *   success: true,
 *   account: {
-*              deviceId: String,
-*              referralId: String,
-*              address: String,
-*              referredBy: String,
-*              addedOn: Date
-*             }
+*     deviceId: String,
+*     referralId: String,
+*     address: String,
+*     referredBy: String,
+*     addedOn: Date
+*            }
 * }
 */
 let getAccount = (req, res) => {
@@ -161,7 +162,7 @@ let getAccount = (req, res) => {
 * @api {put} /account To update account address.
 * @apiName updateAccount
 * @apiGroup Account
-* @apiParam {String} deviceId device ID of client.
+* @apiParam {String} deviceId Device ID of client.
 * @apiParam {String} address Account address of client.
 * @apiError DeviceIdNotRegistered Provided device ID not registered.
 * @apiErrorExample DeviceIdNotRegistered-Response:
