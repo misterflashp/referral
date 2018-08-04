@@ -4,6 +4,30 @@ let bonusDbo = require('../dbos/bonus.dbo');
 let sessionDbo = require('../dbos/session.dbo');
 let accountHelper = require('../helpers/account.helper');
 
+/**
+* @api {post} /account To add account.
+* @apiName addAccount
+* @apiGroup Account
+* @apiParam {String} deviceId device ID of client.
+  @apiParam {String} referredBy Referral ID which is valid.
+* @apiError DeviceIdAlreadyExists Provided deviceId already exists 
+* @apiErrorExample DeviceIdAlreadyExists-Response:
+* {
+*   success: false,
+*   message: 'Device is already registered.'
+* }
+* @apiError ReferredByNotExists Provided referral ID not exists 
+* @apiErrorExample ReferredByNotExists-Response:
+* {
+*   success: false,
+*   message: 'No account exists with referredBy.'
+* }
+* @apiSuccessExample Response: 
+* {
+*   success: true,
+*   message: 'Account added successfully.'
+* }
+*/
 
 let addAccount = (req, res) => {
   let details = req.body;
@@ -81,7 +105,29 @@ let addAccount = (req, res) => {
     res.status(status).send(response);
   });
 };
-
+/**
+* @api {get} /account To get account information.
+* @apiName getAccount
+* @apiGroup Account
+* @apiParam {String} deviceId device ID of client.
+* @apiError DeviceNotRegistered Provided device ID not registered.
+* @apiErrorExample DeviceNotRegistered-Response:
+* {
+*   success: false,
+*   message: 'Device is not registered.'
+* }
+* @apiSuccessExample Response: 
+* {
+*   success: true,
+*   account: {
+*              deviceId: String,
+*              referralId: String,
+*              address: String,
+*              referredBy: String,
+*              addedOn: Date
+*             }
+* }
+*/
 let getAccount = (req, res) => {
   let { deviceId } = req.query;
   async.waterfall([
@@ -111,7 +157,36 @@ let getAccount = (req, res) => {
     res.status(status).send(response);
   });
 };
-
+/**
+* @api {put} /account To update account address.
+* @apiName updateAccount
+* @apiGroup Account
+* @apiParam {String} deviceId device ID of client.
+* @apiParam {String} address Account address of client.
+* @apiError DeviceIdNotRegistered Provided device ID not registered.
+* @apiErrorExample DeviceIdNotRegistered-Response:
+* {
+*   success: false,
+*   message: 'Device is not registered.'
+* }
+* @apiError AccountAddressAlreadyExists Provided device ID already linked with an address.
+* @apiErrorExample AccountAddressAlreadyExists-Response:
+* {
+*   success: false,
+*   message: 'Account address already exists.'
+* }
+* @apiError AddressAlreadyAssociatedWithOtherDevice Provided address already associated with another device.
+* @apiErrorExample AddressAlreadyAssociatedWithOtherDevice-Response:
+* {
+*   success: false,
+*   message: 'Address already associated with another device.'
+* }
+* @apiSuccessExample Response: 
+* {
+*   success: true,
+*   message: 'Account updated successfully.'
+* }
+*/
 let updateAccount = (req, res) => {
   let { deviceId,
     address } = req.body;

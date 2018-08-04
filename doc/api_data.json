@@ -1,10 +1,10 @@
 [
   {
     "type": "post",
-    "url": "/referral",
-    "title": "To add referral address.",
-    "name": "addReferral",
-    "group": "Referral",
+    "url": "/account",
+    "title": "To add account.",
+    "name": "addAccount",
+    "group": "Account",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -12,14 +12,14 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "clientAddress",
-            "description": "<p>Address of client.</p>"
+            "field": "deviceId",
+            "description": "<p>device ID of client.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "referralId",
+            "field": "referredBy",
             "description": "<p>Referral ID which is valid.</p>"
           }
         ]
@@ -31,26 +31,26 @@
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "ClientAddressAlreadyExists",
-            "description": "<p>Provided address already exists</p>"
+            "field": "DeviceIdAlreadyExists",
+            "description": "<p>Provided deviceId already exists</p>"
           },
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "ReferralIdNotExists",
+            "field": "ReferredByNotExists",
             "description": "<p>Provided referral ID not exists</p>"
           }
         ]
       },
       "examples": [
         {
-          "title": "ClientAddressAlreadyExists-Response:",
-          "content": "{\n  success: false,\n  message: 'Client address is already exists.'\n}",
+          "title": "DeviceIdAlreadyExists-Response:",
+          "content": "{\n  success: false,\n  message: 'Device is already registered.'\n}",
           "type": "json"
         },
         {
-          "title": "ReferralIdNotExists-Response:",
-          "content": "{\n  success: false,\n  message: 'Referral ID is not exist.'\n}",
+          "title": "ReferredByNotExists-Response:",
+          "content": "{\n  success: false,\n  message: 'No account exists with referredBy.'\n}",
           "type": "json"
         }
       ]
@@ -59,21 +59,21 @@
       "examples": [
         {
           "title": "Response: ",
-          "content": "{\n  success: true,\n  message: 'Referral ID added successfully.'\n}",
+          "content": "{\n  success: true,\n  message: 'Account added successfully.'\n}",
           "type": "json"
         }
       ]
     },
     "version": "0.0.0",
-    "filename": "server/controllers/referral.controller.js",
-    "groupTitle": "Referral"
+    "filename": "server/controllers/account.controller.js",
+    "groupTitle": "Account"
   },
   {
-    "type": "post",
-    "url": "/referral/claim",
-    "title": "To claim referral bonus.",
-    "name": "claimBonus",
-    "group": "Referral",
+    "type": "get",
+    "url": "/account",
+    "title": "To get account information.",
+    "name": "getAccount",
+    "group": "Account",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -81,8 +81,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "clientReferralId",
-            "description": "<p>Referral ID of client.</p>"
+            "field": "deviceId",
+            "description": "<p>device ID of client.</p>"
           }
         ]
       }
@@ -93,37 +93,15 @@
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "NoReferralIdExists",
-            "description": "<p>No referral id exists</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "BonusAlreadyClaimed",
-            "description": "<p>Provided client already claimed for bonus</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "PaymentTxNotFound",
-            "description": "<p>Provided client not made first payment yet.</p>"
+            "field": "DeviceNotRegistered",
+            "description": "<p>Provided device ID not registered.</p>"
           }
         ]
       },
       "examples": [
         {
-          "title": "NoReferralIdExists-Response:",
-          "content": "{\n  success: false,\n  message: 'No referral ID exists.'\n}",
-          "type": "json"
-        },
-        {
-          "title": "BonusAlreadyClaimed-Response:",
-          "content": "{\n  success: false,\n  message: 'Bonus already claimed.'\n}",
-          "type": "json"
-        },
-        {
-          "title": "PaymentTxNotFound-Response:",
-          "content": "{\n  success: false,\n  message: 'Payment tx hash not found.'\n}",
+          "title": "DeviceNotRegistered-Response:",
+          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
           "type": "json"
         }
       ]
@@ -131,90 +109,156 @@
     "success": {
       "examples": [
         {
-          "title": "Response:",
+          "title": "Response: ",
+          "content": "{\n  success: true,\n  account: {\n             deviceId: String,\n             referralId: String,\n             address: String,\n             referredBy: String,\n             addedOn: Date\n            }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/account.controller.js",
+    "groupTitle": "Account"
+  },
+  {
+    "type": "put",
+    "url": "/account",
+    "title": "To update account address.",
+    "name": "updateAccount",
+    "group": "Account",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "deviceId",
+            "description": "<p>device ID of client.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "address",
+            "description": "<p>Account address of client.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "DeviceIdNotRegistered",
+            "description": "<p>Provided device ID not registered.</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AccountAddressAlreadyExists",
+            "description": "<p>Provided device ID already linked with an address.</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AddressAlreadyAssociatedWithOtherDevice",
+            "description": "<p>Provided address already associated with another device.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "DeviceIdNotRegistered-Response:",
+          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "AccountAddressAlreadyExists-Response:",
+          "content": "{\n  success: false,\n  message: 'Account address already exists.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "AddressAlreadyAssociatedWithOtherDevice-Response:",
+          "content": "{\n  success: false,\n  message: 'Address already associated with another device.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response: ",
+          "content": "{\n  success: true,\n  message: 'Account updated successfully.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/account.controller.js",
+    "groupTitle": "Account"
+  },
+  {
+    "type": "get",
+    "url": "/bonus/claim",
+    "title": "To claim bonus.",
+    "name": "bonusClaim",
+    "group": "Bonus",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "deviceId",
+            "description": "<p>device ID of client.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "DeviceNotRegistered",
+            "description": "<p>Provided device ID not registered.</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NoAccountAddressExists",
+            "description": "<p>No account address attached for provided deviceId.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "DeviceNotRegistered-Response:",
+          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "NoAccountAddressExists-Response:",
+          "content": "{\n  success: false,\n  message: 'No account address exists.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response: ",
           "content": "{\n  success: true,\n  message: 'Bonus claimed successfully.'\n}",
           "type": "json"
         }
       ]
     },
     "version": "0.0.0",
-    "filename": "server/controllers/referral.controller.js",
-    "groupTitle": "Referral"
-  },
-  {
-    "type": "get",
-    "url": "/referral/info",
-    "title": "To get referral information.",
-    "name": "getReferralInfo",
-    "group": "Referral",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "clientReferralId",
-            "description": "<p>Referral ID of client.</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "NoReferralIdExists",
-            "description": "<p>No referral id exists</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "NoReferralIdExists-Response:",
-          "content": "{\n  success: false,\n  message: 'No address exists.'\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Boolean",
-            "optional": false,
-            "field": "isClaimed",
-            "description": "<p>Status of claim</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "Number",
-            "optional": false,
-            "field": "joinBonus",
-            "description": "<p>Referral amount earned</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "Object",
-            "optional": false,
-            "field": "referral",
-            "description": "<p>Information about referral earnings.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Response:",
-          "content": "{\n  success: true,\n  isClaimed: true,\n  joinBonus: 20000000000,\n  clientReferralId: Referral ID\n  referral: {\n      count: 4,\n      amount: 40000000000\n  }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "server/controllers/referral.controller.js",
-    "groupTitle": "Referral"
+    "filename": "server/controllers/bonus.controller.js",
+    "groupTitle": "Bonus"
   }
 ]

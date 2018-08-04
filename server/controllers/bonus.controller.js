@@ -86,6 +86,30 @@ let bonusesTransfer = (deviceId, bonusTypes, address, cb) => {
   ], (error) => cb(error));
 };
 
+/**
+* @api {get} /bonus/claim To claim bonus.
+* @apiName bonusClaim
+* @apiGroup Bonus
+* @apiParam {String} deviceId device ID of client.
+* @apiError DeviceNotRegistered Provided device ID not registered.
+* @apiErrorExample DeviceNotRegistered-Response:
+* {
+*   success: false,
+*   message: 'Device is not registered.'
+* }
+* @apiError NoAccountAddressExists No account address attached for provided deviceId. 
+* @apiErrorExample NoAccountAddressExists-Response:
+* {
+*   success: false,
+*   message: 'No account address exists.'
+* }
+* @apiSuccessExample Response: 
+* {
+*   success: true,
+*   message: 'Bonus claimed successfully.'
+* }
+*/
+
 let bonusClaim = (req, res) => {
   let { deviceId } = req.body;
   let address = null;
