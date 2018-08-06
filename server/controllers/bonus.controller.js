@@ -3,6 +3,7 @@ let lodash = require('lodash');
 let accountDbo = require('../dbos/account.dbo');
 let bonusDbo = require('../dbos/bonus.dbo');
 let bonusHelper = require('../helpers/bonus.helper');
+let { CLAIM_PERIOD } = require('../../config/referral');
 
 
 let bonusTransfer = (deviceId, bonuses, bonusType, address, cb) => {
@@ -187,6 +188,7 @@ let bonusClaim = (req, res) => {
 */
 let getBonusInfo = (req, res) => {
   let { deviceId } = req.query;
+  let referredBy = null;
   async.waterfall([
     (next) => {
       accountDbo.getAccount({ deviceId },
@@ -195,8 +197,10 @@ let getBonusInfo = (req, res) => {
             status: 500,
             message: 'Error occurred while fetching account.'
           });
-          else if (account) next(null);
-          else next({
+          else if (account) {
+            referredBy = account.referredBy;
+            next(null);
+          } else next({
             status: 400,
             message: 'Device is not registered.'
           });
@@ -211,14 +215,28 @@ let getBonusInfo = (req, res) => {
           else next(null, bonuses);
         });
     }, (bonuses, next) => {
+      let sncBonusesInfo = bonuses.sncBonusesInfo.filter((e) => e.txHash);
+      let slcBonusesInfo = bonuses.slcBonusesInfo.filter((e) => e.txHash);
+      let refBonusesInfo = bonuses.refBonusesInfo.filter((e) => e.txHash);
+      let sncSessionDate = null;
+      let slcSessionDate = null;
+      if (sncBonusesInfo && sncBonusesInfo.length) sncSessionDate = sncBonusesInfo[0].onDate.getTime();
+      if (slcBonusesInfo && slcBonusesInfo.length) slcSessionDate = slcBonusesInfo[0].onDate.getTime();
+      let sessionDate = Math.min(sncSessionDate || Number.MAX_SAFE_INTEGER, slcSessionDate || Number.MAX_SAFE_INTEGER);
+      let amount = lodash.sum(lodash.map(bonuses.refBonusesInfo.filter((e) => !e.txHash), 'amount')) +
+        lodash.sum(lodash.map(bonuses.sncBonusesInfo.filter((e) => !e.txHash), 'amount')) +
+        lodash.sum(lodash.map(bonuses.slcBonusesInfo.filter((e) => !e.txHash), 'amount'));
+      console.log(sncSessionDate, slcSessionDate, sessionDate, amount);
       next(null, {
         status: 200,
         bonuses: {
-          snc: lodash.sum(lodash.map(bonuses.sncBonusesInfo.filter((e) => e.txHash), 'amount')),
-          slc: lodash.sum(lodash.map(bonuses.slcBonusesInfo.filter((e) => e.txHash), 'amount')),
-          ref: lodash.sum(lodash.map(bonuses.refBonusesInfo.filter((e) => e.txHash), 'amount'))
+          snc: lodash.sum(lodash.map(sncBonusesInfo, 'amount')),
+          slc: lodash.sum(lodash.map(slcBonusesInfo, 'amount')),
+          ref: lodash.sum(lodash.map(refBonusesInfo, 'amount'))
         },
-        refCount: bonuses.refBonusesInfo.filter((e) => e.txHash).length
+        refCount: refBonusesInfo.length,
+        canClaim: (amount && referredBy) ? true : false,
+        canClaimAfter: sessionDate ? new Date(sessionDate + CLAIM_PERIOD) : null
       });
     },
   ], (error, success) => {
