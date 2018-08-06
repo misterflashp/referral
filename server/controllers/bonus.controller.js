@@ -90,7 +90,7 @@ let bonusesTransfer = (deviceId, bonusTypes, address, cb) => {
 * @api {get} /bonus/claim To claim bonus.
 * @apiName bonusClaim
 * @apiGroup Bonus
-* @apiParam {String} deviceId device ID of client.
+* @apiParam {String} deviceId Device ID of client.
 * @apiError DeviceNotRegistered Provided device ID not registered.
 * @apiErrorExample DeviceNotRegistered-Response:
 * {
@@ -102,6 +102,12 @@ let bonusesTransfer = (deviceId, bonusTypes, address, cb) => {
 * {
 *   success: false,
 *   message: 'No account address exists.'
+* }
+* @apiError BonusAlreadyClaimedOrNoBonusToClaim Bonus already claimed OR no bonuses to claim. 
+* @apiErrorExample BonusAlreadyClaimedOrNoBonusToClaim-Response:
+* {
+*   success: false,
+*   message: 'Bonus already claimed OR no bonuses to claim.'
 * }
 * @apiSuccessExample Response: 
 * {

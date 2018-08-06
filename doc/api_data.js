@@ -13,7 +13,14 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "deviceId",
-            "description": "<p>device ID of client.</p>"
+            "description": "<p>Device ID of client.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "address",
+            "description": "<p>Account address of client.</p>"
           },
           {
             "group": "Parameter",
@@ -82,7 +89,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "deviceId",
-            "description": "<p>device ID of client.</p>"
+            "description": "<p>Device ID of client.</p>"
           }
         ]
       }
@@ -110,7 +117,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Response: ",
-          "content": "{\n  success: true,\n  account: {\n             deviceId: String,\n             referralId: String,\n             address: String,\n             referredBy: String,\n             addedOn: Date\n            }\n}",
+          "content": "{\n  success: true,\n  account: {\n    deviceId: String,\n    referralId: String,\n    address: String,\n    referredBy: String,\n    addedOn: Date\n           }\n}",
           "type": "json"
         }
       ]
@@ -133,7 +140,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "deviceId",
-            "description": "<p>device ID of client.</p>"
+            "description": "<p>Device ID of client.</p>"
           },
           {
             "group": "Parameter",
@@ -213,7 +220,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "deviceId",
-            "description": "<p>device ID of client.</p>"
+            "description": "<p>Device ID of client.</p>"
           }
         ]
       }
@@ -232,6 +239,12 @@ define({ "api": [
             "optional": false,
             "field": "NoAccountAddressExists",
             "description": "<p>No account address attached for provided deviceId.</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "BonusAlreadyClaimedOrNoBonusToClaim",
+            "description": "<p>Bonus already claimed OR no bonuses to claim.</p>"
           }
         ]
       },
@@ -244,6 +257,11 @@ define({ "api": [
         {
           "title": "NoAccountAddressExists-Response:",
           "content": "{\n  success: false,\n  message: 'No account address exists.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "BonusAlreadyClaimedOrNoBonusToClaim-Response:",
+          "content": "{\n  success: false,\n  message: 'Bonus already claimed OR no bonuses to claim.'\n}",
           "type": "json"
         }
       ]
