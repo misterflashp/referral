@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "mocha test/referral/referral.test.js",
+    "test": "mocha test/referral/*.test.js",
     "start": "node server.js"
   },
   "author": "",
@@ -21,8 +21,8 @@
     "joi": "^13.4.0",
     "lodash": "^4.17.10",
     "method-override": "^3.0.0",
-    "mongoose": "^5.2.5",
+    "mongoose": "^5.2.6",
     "morgan": "^1.9.0",
-    "web3": "^0.20.6"
+    "web3": "^0.20.7"
   }
 }

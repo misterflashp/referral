@@ -117,7 +117,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Response: ",
-          "content": "{\n  success: true,\n  account: {\n    deviceId: String,\n    referralId: String,\n    address: String,\n    referredBy: String,\n    addedOn: Date\n           }\n}",
+          "content": "{\n  success: true,\n  account: {\n    deviceId: String,\n    referralId: String,\n    address: String,\n    referredBy: String,\n    addedOn: Date\n  }\n}",
           "type": "json"
         }
       ]
@@ -271,6 +271,57 @@ define({ "api": [
         {
           "title": "Response: ",
           "content": "{\n  success: true,\n  message: 'Bonus claimed successfully.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/bonus.controller.js",
+    "groupTitle": "Bonus"
+  },
+  {
+    "type": "get",
+    "url": "/bonus/info",
+    "title": "To get bonus information.",
+    "name": "getBonusInfo",
+    "group": "Bonus",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "deviceId",
+            "description": "<p>Device ID of client.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "DeviceNotRegistered",
+            "description": "<p>Provided device ID not registered.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "DeviceNotRegistered-Response:",
+          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response: ",
+          "content": "{\n  success: true,\n  bonuses: {\n    snc: Number,\n    slc: Number,\n    ref: Number,\n  },\n  refCount: Number\n}",
           "type": "json"
         }
       ]

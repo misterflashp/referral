@@ -163,6 +163,28 @@ let bonusClaim = (req, res) => {
   });
 };
 
+/**
+* @api {get} /bonus/info To get bonus information.
+* @apiName getBonusInfo
+* @apiGroup Bonus
+* @apiParam {String} deviceId Device ID of client.
+* @apiError DeviceNotRegistered Provided device ID not registered.
+* @apiErrorExample DeviceNotRegistered-Response:
+* {
+*   success: false,
+*   message: 'Device is not registered.'
+* }
+* @apiSuccessExample Response: 
+* {
+*   success: true,
+*   bonuses: {
+*     snc: Number,
+*     slc: Number,
+*     ref: Number,
+*   },
+*   refCount: Number
+* }
+*/
 let getBonusInfo = (req, res) => {
   let { deviceId } = req.query;
   async.waterfall([
