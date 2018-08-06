@@ -13,13 +13,13 @@ let addSession = (deviceId, appCode, session, cb) => {
   SessionModel.findOneAndUpdate({
     deviceId
   }, {
-    $push: {
-      [appCode === 'SNC' ? 'sncSessionsInfo' : 'slcSessionsInfo'] : session
-    }
-  }, (error, result) => {
-    if(error) cb(error, null);
-    else cb(null, result);
-  });
+      $push: {
+        [appCode === 'SNC' ? 'sncSessionsInfo' : 'slcSessionsInfo']: session
+      }
+    }, (error, result) => {
+      if (error) cb(error, null);
+      else cb(null, result);
+    });
 };
 
 let getSession = (deviceId, cb) => {
@@ -37,4 +37,4 @@ module.exports = {
   initSession,
   addSession,
   getSession
-}
+};
