@@ -9,7 +9,7 @@ let bonusSchema = new mongoose.Schema({
   },
   sncBonusesInfo: [
     /* {
-      amount: number,
+      amount: number, // required
       txHash: string,
       sessionNumber: number, // required
       onDate: Date
@@ -17,7 +17,7 @@ let bonusSchema = new mongoose.Schema({
   ],
   slcBonusesInfo: [
     /* {
-      amount: number,
+      amount: number, // required
       txHash: string,
       sessionNumber: number // required
       onDate: Date,
@@ -26,7 +26,7 @@ let bonusSchema = new mongoose.Schema({
   refBonusesInfo: [
     /* {
       deviceId: string, // required
-      amount: number,
+      amount: number, // required
       txHash: string,
       onDate: Date,
     } */

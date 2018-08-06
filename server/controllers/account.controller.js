@@ -4,6 +4,7 @@ let bonusDbo = require('../dbos/bonus.dbo');
 let sessionDbo = require('../dbos/session.dbo');
 let accountHelper = require('../helpers/account.helper');
 
+
 /**
 * @api {post} /account To add account.
 * @apiName addAccount
@@ -28,7 +29,6 @@ let accountHelper = require('../helpers/account.helper');
 *   message: 'Account added successfully.'
 * }
 */
-
 let addAccount = (req, res) => {
   let details = req.body;
   let { deviceId,
@@ -105,6 +105,7 @@ let addAccount = (req, res) => {
     res.status(status).send(response);
   });
 };
+
 /**
 * @api {get} /account To get account information.
 * @apiName getAccount
@@ -120,12 +121,12 @@ let addAccount = (req, res) => {
 * {
 *   success: true,
 *   account: {
-*              deviceId: String,
-*              referralId: String,
-*              address: String,
-*              referredBy: String,
-*              addedOn: Date
-*             }
+*     deviceId: String,
+*     referralId: String,
+*     address: String,
+*     referredBy: String,
+*     addedOn: Date
+*   }
 * }
 */
 let getAccount = (req, res) => {
@@ -157,6 +158,7 @@ let getAccount = (req, res) => {
     res.status(status).send(response);
   });
 };
+
 /**
 * @api {put} /account To update account address.
 * @apiName updateAccount
