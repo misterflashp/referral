@@ -181,9 +181,11 @@ let bonusClaim = (req, res) => {
 *   bonuses: {
 *     snc: Number,
 *     slc: Number,
-*     ref: Number,
+*     ref: Number
 *   },
-*   refCount: Number
+*   refCount: Number,
+*   canClaim: Boolean,
+*   canClaimAfter: Date
 * }
 */
 let getBonusInfo = (req, res) => {

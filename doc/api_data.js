@@ -321,7 +321,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Response: ",
-          "content": "{\n  success: true,\n  bonuses: {\n    snc: Number,\n    slc: Number,\n    ref: Number,\n  },\n  refCount: Number\n}",
+          "content": "{\n  success: true,\n  bonuses: {\n    snc: Number,\n    slc: Number,\n    ref: Number\n  },\n  refCount: Number,\n  canClaim: Boolean,\n  canClaimAfter: Date\n}",
           "type": "json"
         }
       ]
