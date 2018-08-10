@@ -66,7 +66,7 @@ let addAccount = (req, res) => {
       } else next(null);
     }, (next) => {
       try {
-        details.referralId = accountHelper.generateReferralId(deviceId);
+        details.referralId = accountHelper.generateReferralId();
         next(null);
       } catch (error) {
         next({
