@@ -1,4 +1,5 @@
 let async = require('async');
+let lodash = require('lodash');
 let accountDbo = require('../dbos/account.dbo');
 let bonusDbo = require('../dbos/bonus.dbo');
 let sessionDbo = require('../dbos/session.dbo');
@@ -249,8 +250,56 @@ let updateAccount = (req, res) => {
   });
 };
 
+let getAccounts = (req, res) => {
+  async.waterfall([
+    (next) => {
+      accountDbo.getAccounts((error, accounts) => {
+        if (error) next({
+          status: 500,
+          message: 'Error occurred while fetching accounts.'
+        });
+        else next(null, accounts);
+      });
+    }, (_accounts, next) => {
+      let refs = {};
+      let accounts = [];
+      lodash.forEach(_accounts,
+        (account) => {
+          let { referralId } = account;
+          if (!refs.hasOwnProperty(referralId)) refs[referralId] = [];
+        });
+      lodash.forEach(_accounts,
+        (account) => {
+          let { referralId, referredBy } = account;
+          if (referredBy) refs[referredBy].push(referralId);
+        });
+      lodash.forEach(_accounts,
+        (account) => {
+          let { referralId } = account;
+          account.refs = refs[referralId];
+          account = account.toObject();
+          accounts.push(Object.assign({}, account, {
+            refs: refs[referralId]
+          }));
+        });
+      next(null, {
+        status: 200,
+        accounts
+      });
+    }
+  ], (error, success) => {
+    let response = Object.assign({
+      success: !error
+    }, error || success);
+    let status = response.status;
+    delete (response.status);
+    res.status(status).send(response);
+  });
+};
+
 module.exports = {
   addAccount,
   getAccount,
+  getAccounts,
   updateAccount
 };
