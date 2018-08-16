@@ -18,6 +18,15 @@ let getAccount = (findObject, cb) => {
   });
 };
 
+let getAccounts = (cb) => {
+  AccountModel.find({}, {
+    '_id': 0
+  }, (error, accounts) => {
+    if(error) cb(error, null);
+    else cb(null, accounts || []);
+  });
+};
+
 let updateAccount = (findObject, updateObject, cb) => {
   AccountModel.findOneAndUpdate(findObject, {
     $set: updateObject
@@ -27,8 +36,21 @@ let updateAccount = (findObject, updateObject, cb) => {
   });
 };
 
+let getReferrals = (referralId, cb) => {
+  AccountModel.find({
+    referredBy: referralId
+  }, {
+    '_id': 0
+  }, (error, accounts) => {
+    if(error) cb(error, null);
+    else cb(null, accounts || []);
+  });
+};
+
 module.exports = {
   addAccount,
   getAccount,
+  getAccounts,
+  getReferrals,
   updateAccount
 };

@@ -190,6 +190,8 @@ let bonusClaim = (req, res) => {
 */
 let getBonusInfo = (req, res) => {
   let { deviceId } = req.query;
+  let refCount = 0;
+  let referralId = null;
   let referredBy = null;
   async.waterfall([
     (next) => {
@@ -200,12 +202,25 @@ let getBonusInfo = (req, res) => {
             message: 'Error occurred while fetching account.'
           });
           else if (account) {
+            referralId = account.referralId;
             referredBy = account.referredBy;
             next(null);
           } else next({
             status: 400,
             message: 'Device is not registered.'
           });
+        });
+    }, (next) => {
+      accountDbo.getReferrals(referralId,
+        (error, referrals) => {
+          if (error) next({
+            status: 500,
+            message: 'Error occurred while getting bonuses.'
+          });
+          else {
+            refCount = referrals.length;
+            next(null);
+          }
         });
     }, (next) => {
       bonusDbo.getBonuses(deviceId,
@@ -228,7 +243,6 @@ let getBonusInfo = (req, res) => {
       let amount = lodash.sum(lodash.map(bonuses.refBonusesInfo.filter((e) => !e.txHash), 'amount')) +
         lodash.sum(lodash.map(bonuses.sncBonusesInfo.filter((e) => !e.txHash), 'amount')) +
         lodash.sum(lodash.map(bonuses.slcBonusesInfo.filter((e) => !e.txHash), 'amount'));
-      console.log(sncSessionDate, slcSessionDate, sessionDate, amount);
       next(null, {
         status: 200,
         bonuses: {
@@ -236,7 +250,7 @@ let getBonusInfo = (req, res) => {
           slc: lodash.sum(lodash.map(slcBonusesInfo, 'amount')),
           ref: lodash.sum(lodash.map(refBonusesInfo, 'amount'))
         },
-        refCount: refBonusesInfo.length,
+        refCount,
         canClaim: (amount && referredBy) ? true : false,
         canClaimAfter: sessionDate ? new Date(sessionDate + CLAIM_PERIOD) : null
       });

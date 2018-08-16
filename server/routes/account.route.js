@@ -8,4 +8,6 @@ module.exports = (server) => {
   server.put('/account', accountValidation.updateAccount, accountContoller.updateAccount);
 
   server.get('/account', accountValidation.getAccount, accountContoller.getAccount);
+
+  server.get('/accounts', accountContoller.getAccounts);
 };

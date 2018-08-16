@@ -11,7 +11,12 @@ let mongoDbConfig = require('./vars').mongoDb;
 
 
 let initServer = () => {
-  let mongoDbUrl = `mongodb://${mongoDbConfig.address}:${mongoDbConfig.port}/${mongoDbConfig.dbName}`;
+  let { username,
+    password,
+    address,
+    port,
+    dbName } = mongoDbConfig;
+  let mongoDbUrl = `mongodb://${username}:${password}@${address}:${port}/${dbName}`;
   let server = express();
   let corsOptions = {
     'origin': '*',

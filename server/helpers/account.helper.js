@@ -1,9 +1,14 @@
-let crc = require('crc');
+let ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+let NUM = "0123456789";
 
-
-let generateReferralId = (deviceId) => {
-  return crc.crc32(deviceId).toString(36).padEnd(7, '0');
-};
+let generateReferralId = () => {
+  let id = "SENT-";
+  for (let i = 0; i < 8; ++i) {
+    id += i & 1 ? NUM.charAt(Math.floor(Math.random() * NUM.length)) :
+      ALPHA.charAt(Math.floor(Math.random() * ALPHA.length));
+  }
+  return id.toUpperCase();
+}
 
 module.exports = {
   generateReferralId
