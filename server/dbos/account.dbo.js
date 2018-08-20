@@ -22,7 +22,7 @@ let getAccounts = (cb) => {
   AccountModel.find({}, {
     '_id': 0
   }, (error, accounts) => {
-    if(error) cb(error, null);
+    if (error) cb(error, null);
     else cb(null, accounts || []);
   });
 };
@@ -40,17 +40,40 @@ let getReferrals = (referralId, cb) => {
   AccountModel.find({
     referredBy: referralId
   }, {
-    '_id': 0
-  }, (error, accounts) => {
-    if(error) cb(error, null);
-    else cb(null, accounts || []);
-  });
+      '_id': 0
+    }, (error, accounts) => {
+      if (error) cb(error, null);
+      else cb(null, accounts || []);
+    });
 };
 
+let getSortedAccounts = (object, cb) => {
+  let { start, count, sortBy } = object;
+  start = parseInt(object.start, 10);
+  count = parseInt(object.count, 10);
+  AccountModel.find({}, { _id: 0 }, { skip: start, limit: count, sort: sortBy }, (error, leaders) => {
+    if (error) cb(error, null);
+    else cb(null, leaders);
+  });
+}
+let getAccountsByRefCount = (object, cb) => {
+  let { start, count } = object;
+  start = parseInt(start, 10);
+  count = parseInt(count, 10);
+  AccountModel.aggregate([{ $match: { referredBy: { $ne: null } } },
+  { $group: { _id: '$referredBy', refs: { $push: '$referralId' } } }, { $skip: start }, { $limit: count },
+  { $project: { _id: 1, refs: 1, refsCount: { $size: '$refs' } } }, { $sort: { refsCount: -1 } }],
+    (error, leaders) => {
+      if (error) { cb(error, null); }
+      else cb(null, leaders);
+    });
+}
 module.exports = {
   addAccount,
   getAccount,
   getAccounts,
+  getSortedAccounts,
+  getAccountsByRefCount,
   getReferrals,
   updateAccount
 };

@@ -250,6 +250,88 @@ let updateAccount = (req, res) => {
   });
 };
 
+let getLeaderBoard = (req, res) => {
+  let { sortBy,
+    start,
+    count } = req.query;
+  if (!sortBy) { sortBy = 'addedOn' }
+  if (!start) { start = 0 }
+  if (!count) { count = 100 }
+  async.waterfall([
+    (next) => {
+      accountDbo.getAccountsByRefCount({ start, count }, (error, result) => {
+        if (error) {
+          next({
+            status: 500,
+            message: 'Error while fetching data'
+          }, null);
+        } else next(null, result);
+      });
+    },
+    (leaderboard, next) => {
+      accountDbo.getSortedAccounts({ sortBy, start, count }, (error, leaders) => {
+        if (error) {
+          next({
+            status: 500,
+            message: 'Error while fetching data'
+          }, null);
+        } else {
+          next(null, leaderboard, leaders);
+        }
+      });
+    },
+    (leaderboard, leaders, next) => {
+      if (sortBy === 'refCount') {
+        let temp = {};
+        lodash.forEach(leaders,
+          (leader) => {
+            temp[leader.referralId] = leader;
+          });
+        let final = [];
+        lodash.forEach(leaderboard,
+          (lead) => {
+            final.push({ details: temp[lead._id], ref: lead.refs });
+          });
+        lodash.forEach(leaders,
+          (leader) => {
+            if (!final[leader.referralId]) {
+              final.push({ details: temp[leader.referralId], ref: [] });
+            }
+          });
+        next(null, {
+          status: 200,
+          info: final
+        });
+      } else {
+        let temp = {};
+        lodash.forEach(leaderboard,
+          (leader) => {
+            temp[leader._id] = leader;
+          });
+        let final = [];
+        lodash.forEach(leaders,
+          (lead) => {
+            if (!temp[lead.referralId]) {
+              final.push({ devideId: lead.deviceId, referredBy: lead.referredBy, referralId: lead.referralId, refs: [] });
+            } else {
+              final.push({ devideId: lead.deviceId, referredBy: lead.referredBy, referralId: lead.referralId, refs: temp[lead.referralId].refs });
+            }
+          });
+        next(null, {
+          status: 200,
+          info: final
+        });
+      }
+    }], (error, success) => {
+      let response = Object.assign({
+        success: !error
+      }, error || success);
+      let status = response.status;
+      delete (response.status);
+      res.status(status).send(response);
+    });
+};
+
 let getAccounts = (req, res) => {
   async.waterfall([
     (next) => {
@@ -299,6 +381,7 @@ let getAccounts = (req, res) => {
 
 module.exports = {
   addAccount,
+  getLeaderBoard,
   getAccount,
   getAccounts,
   updateAccount
