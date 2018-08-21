@@ -28,6 +28,22 @@ let updateAccount = (req, res, next) => {
   else next();
 };
 
+let leaderBoard = (req, res, next) => {
+  let leaderBoardSchema = joi.object().keys({
+    sortBy: joi.string(),
+    start: joi.number(),
+    count: joi.number()
+  });
+  let { error } = joi.validate(req.query, leaderBoardSchema);
+  if(error) res.status(422).send({
+    success:false,
+    error
+  });
+  else{
+    next();
+  }
+}
+
 let getAccount = (req, res, next) => {
   let getAccountSchema = joi.object().keys({
     deviceId: joi.string().required()
@@ -42,6 +58,7 @@ let getAccount = (req, res, next) => {
 
 module.exports = {
   addAccount,
+  leaderBoard,
   updateAccount,
   getAccount
 };

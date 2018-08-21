@@ -250,6 +250,132 @@ let updateAccount = (req, res) => {
   });
 };
 
+
+/**
+* @api {get} /leader To fetch leaderboard.
+* @apiName getLeaderBoard
+* @apiGroup Leaderboard
+* @apiParam {String} sortBy Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], and use +[attribute] for ascending, -[attribute] for descending.
+* @apiParam {Number} start Number of records to skip, default value is 0 and use positive numbers.
+* @apiParam {Number} count Number of records to return, default value is 100, use positive numbers.
+* @apiError ErrorWhileFetchingData Error while fetching leaderboard.
+* @apiErrorExample ErrorWhileFetchingData-Response:
+* {
+*   success: false,
+*   message: 'Error while fetching data.'
+* }
+* @apiSuccessExample Response: 
+* 
+* {
+*  "success": true,
+*  "info": [
+*    {
+*      "devideId": "0000000000000000",
+*      "referralId": "SENT-XXXXXXXX",
+*      "refs": [
+*         "SENT-XXXXXXXY",
+*         "SENT-XXXXXXXZ",
+*         "SENT-XXXXXXXW",
+*         "SENT-XXXXXXXL"
+*        ]
+*    }
+*   ]
+* }
+   
+*/
+let getLeaderBoard = (req, res) => {
+  let { sortBy,
+    start,
+    count } = req.query;
+  if (!sortBy) { sortBy = 'addedOn' }
+  if (!start) { start = 0 }
+  if (!count) { count = 100 }
+  start = parseInt(start, 10);
+  count = parseInt(count, 10);
+  let end = start + count;
+  let sortCount = (sortBy === 'refCount') ? 10000 : count;
+  let sortStart = (sortBy === 'refCount') ? 0 : start;
+  async.waterfall([
+    (next) => {
+      accountDbo.getAccountsByRefCount((error, result) => {
+        if (error) {
+          next({
+            status: 500,
+            success: false,
+            message: 'Error while fetching data'
+          }, null);
+        } else next(null, result);
+      });
+    },
+    (leaderboard, next) => {
+      accountDbo.getSortedAccounts({ sortBy, sortStart, sortCount }, (error, leaders) => {
+        if (error) {
+          next({
+            status: 500,
+            success: false,
+            message: 'Error while fetching data'
+          }, null);
+        } else {
+          next(null, leaderboard, leaders);
+        }
+      });
+    },
+    (leaderboard, leaders, next) => {
+      if (sortBy === 'refCount') {
+        let temp = {};
+        let final = [];
+        let temp2 = {};
+        lodash.forEach(leaders,
+          (leader) => {
+            temp[leader.referralId] = leader;
+          });
+        lodash.forEach(leaderboard,
+          (lead) => {
+            temp2[lead._id] = lead;
+            final.push({ details: temp[lead._id], ref: lead.refs });
+          });
+        lodash.forEach(leaders,
+          (leader) => {
+            if (!temp2[leader.referralId]) {
+              final.push({ details: temp[leader.referralId], ref: [] });
+            }
+          });
+
+        final1 = final.slice(start, end);
+        next(null, {
+          status: 200,
+          info: final1
+        });
+      } else {
+        let temp = {};
+        lodash.forEach(leaderboard,
+          (leader) => {
+            temp[leader._id] = leader;
+          });
+        let final = [];
+        lodash.forEach(leaders,
+          (lead) => {
+            if (!temp[lead.referralId]) {
+              final.push({ devideId: lead.deviceId, referredBy: lead.referredBy, referralId: lead.referralId, refs: [] });
+            } else {
+              final.push({ devideId: lead.deviceId, referredBy: lead.referredBy, referralId: lead.referralId, refs: temp[lead.referralId].refs });
+            }
+          });
+        next(null, {
+          status: 200,
+          info: final
+        });
+      }
+    }], (error, success) => {
+      let response = Object.assign({
+        success: !error
+      }, error || success);
+      let status = response.status;
+      delete (response.status);
+      res.status(status).send(response);
+    });
+};
+
 let getAccounts = (req, res) => {
   async.waterfall([
     (next) => {
@@ -299,6 +425,7 @@ let getAccounts = (req, res) => {
 
 module.exports = {
   addAccount,
+  getLeaderBoard,
   getAccount,
   getAccounts,
   updateAccount
