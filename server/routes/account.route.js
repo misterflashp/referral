@@ -10,5 +10,6 @@ module.exports = (server) => {
   server.get('/account', accountValidation.getAccount, accountContoller.getAccount);
 
   server.get('/accounts', accountContoller.getAccounts);
-  server.get('/leader',accountValidation.leaderBoard, accountContoller.getLeaderBoard);
+
+  server.get('/leaderboard', accountValidation.getLeaderBoard, accountContoller.getLeaderBoard);
 };

@@ -332,7 +332,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/leader",
+    "url": "/leaderboard",
     "title": "To fetch leaderboard.",
     "name": "getLeaderBoard",
     "group": "Leaderboard",
@@ -358,7 +358,7 @@ define({ "api": [
             "type": "Number",
             "optional": false,
             "field": "count",
-            "description": "<p>Number of records to return, default value is 100, use positive numbers.</p>"
+            "description": "<p>Number of records to return, default value is 10, use positive numbers.</p>"
           }
         ]
       }
