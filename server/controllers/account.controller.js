@@ -286,21 +286,21 @@ let updateAccount = (req, res) => {
 let getLeaderBoard = (req, res) => {
   let { sortBy,
     start,
-    count } = req.query;
-  if (!sortBy) sortBy = 'addedOn';
+    count,
+    order } = req.query;
+  if (!sortBy) sortBy = 'refCount';
   if (!start) start = 0;
   if (!count) count = 10;
+  if (!order) order = 'dec';
+  order = (order === 'dec')? -1 : 1;
+  order = parseInt(order, 10);
   start = parseInt(start, 10);
   count = parseInt(count, 10);
-  if (sortBy === 'refCount') {
-    start = 0;
-    count = Number.POSITIVE_INFINITY;
-  }
   let end = start + count;
 
   async.waterfall([
     (next) => {
-      accountDbo.getSortedAccountsByRefCount((error, result) => {
+      accountDbo.getSortedAccountsByRefCount(order,(error, result) => {
         if (error) next({
           status: 500,
           message: 'Error while fetching data.'
@@ -308,17 +308,18 @@ let getLeaderBoard = (req, res) => {
         else next(null, result);
       });
     }, (leaderboard, next) => {
-      accountDbo.getSortedAccounts({
-        sortBy, start, count
-      }, (error, leaders) => {
-        if (error) {
-          next({
-            status: 500,
-            success: false,
-            message: 'Error while fetching data.'
-          }, null);
-        } else next(null, leaderboard, leaders);
-      });
+      let tmpStart = sortBy === 'refCount' ? 0 : start;
+      let tmpCount = sortBy === 'refCount' ? 1000000 : count;
+      accountDbo.getSortedAccounts({ order, sortBy, tmpStart, tmpCount },
+        (error, leaders) => {
+          if (error) {
+            next({
+              status: 500,
+              success: false,
+              message: 'Error while fetching data.'
+            }, null);
+          } else next(null, leaderboard, leaders);
+        });
     }, (leaderboard, leaders, next) => {
       if (sortBy === 'refCount') {
         let temp = {};
@@ -345,6 +346,7 @@ let getLeaderBoard = (req, res) => {
               });
             }
           });
+        console.log(start, end);
         final1 = final.slice(start, end);
         next(null, {
           status: 200,
