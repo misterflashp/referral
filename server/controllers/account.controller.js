@@ -255,9 +255,10 @@ let updateAccount = (req, res) => {
 * @api {get} /leaderboard To fetch leaderboard.
 * @apiName getLeaderBoard
 * @apiGroup Leaderboard
-* @apiParam {String} sortBy Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], and use +[attribute] for ascending, -[attribute] for descending.
+* @apiParam {String} sortBy Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], default sortBy is 'refCount'.
 * @apiParam {Number} start Number of records to skip, default value is 0 and use positive numbers.
 * @apiParam {Number} count Number of records to return, default value is 10, use positive numbers.
+* @apiParam {String} order Order to sort [asc/des], Default sort [des].
 * @apiError ErrorWhileFetchingData Error while fetching leaderboard.
 * @apiErrorExample ErrorWhileFetchingData-Response:
 * {
@@ -291,8 +292,8 @@ let getLeaderBoard = (req, res) => {
   if (!sortBy) sortBy = 'refCount';
   if (!start) start = 0;
   if (!count) count = 10;
-  if (!order) order = 'dec';
-  order = (order === 'dec')? -1 : 1;
+  if (!order) order = 'des';
+  order = (order === 'des')? -1 : 1;
   order = parseInt(order, 10);
   start = parseInt(start, 10);
   count = parseInt(count, 10);
