@@ -32,7 +32,8 @@ let getLeaderBoard = (req, res, next) => {
   let getLeaderBoardSchema = joi.object().keys({
     sortBy: joi.string(),
     start: joi.number(),
-    count: joi.number()
+    count: joi.number(),
+    order: joi.string()
   });
   let { error } = joi.validate(req.query, getLeaderBoardSchema);
   if (error) res.status(422).send({

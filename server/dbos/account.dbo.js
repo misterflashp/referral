@@ -48,20 +48,22 @@ let getReferrals = (referralId, cb) => {
 };
 
 let getSortedAccounts = (object, cb) => {
-  let { start,
-    count,
-    sortBy } = object;
+  let { tmpStart,
+    tmpCount,
+    order,
+  sortBy } = object;
+  let sortObj = {}; sortObj[sortBy] = order;
   AccountModel.find({}, { _id: 0 }, {
-    skip: start,
-    limit: count,
-    sort: sortBy
+    sort: sortObj,
+    skip: tmpStart,
+    limit: tmpCount
   }, (error, result) => {
     if (error) cb(error, null);
     else cb(null, result || []);
   });
 };
 
-let getSortedAccountsByRefCount = (cb) => {
+let getSortedAccountsByRefCount = (order, cb) => {
   AccountModel.aggregate([{
     $match: {
       referredBy: { $ne: null }
@@ -78,7 +80,7 @@ let getSortedAccountsByRefCount = (cb) => {
       refsCount: { $size: '$refs' }
     }
   }, {
-    $sort: { refsCount: -1 }
+    $sort: { refsCount: order }
   }], (error, result) => {
     if (error) cb(error, null);
     else cb(null, result);

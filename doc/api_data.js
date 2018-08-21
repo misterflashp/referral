@@ -344,7 +344,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "sortBy",
-            "description": "<p>Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], and use +[attribute] for ascending, -[attribute] for descending.</p>"
+            "description": "<p>Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], default sortBy is 'refCount'.</p>"
           },
           {
             "group": "Parameter",
@@ -359,6 +359,13 @@ define({ "api": [
             "optional": false,
             "field": "count",
             "description": "<p>Number of records to return, default value is 10, use positive numbers.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "order",
+            "description": "<p>Order to sort [asc/des], Default sort [des].</p>"
           }
         ]
       }
