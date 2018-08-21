@@ -252,12 +252,12 @@ let updateAccount = (req, res) => {
 
 
 /**
-* @api {get} /leader To fetch leaderboard.
+* @api {get} /leaderboard To fetch leaderboard.
 * @apiName getLeaderBoard
 * @apiGroup Leaderboard
 * @apiParam {String} sortBy Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], and use +[attribute] for ascending, -[attribute] for descending.
 * @apiParam {Number} start Number of records to skip, default value is 0 and use positive numbers.
-* @apiParam {Number} count Number of records to return, default value is 100, use positive numbers.
+* @apiParam {Number} count Number of records to return, default value is 10, use positive numbers.
 * @apiError ErrorWhileFetchingData Error while fetching leaderboard.
 * @apiErrorExample ErrorWhileFetchingData-Response:
 * {
@@ -287,40 +287,39 @@ let getLeaderBoard = (req, res) => {
   let { sortBy,
     start,
     count } = req.query;
-  if (!sortBy) { sortBy = 'addedOn' }
-  if (!start) { start = 0 }
-  if (!count) { count = 100 }
+  if (!sortBy) sortBy = 'addedOn';
+  if (!start) start = 0;
+  if (!count) count = 10;
   start = parseInt(start, 10);
   count = parseInt(count, 10);
+  if (sortBy === 'refCount') {
+    start = 0;
+    count = Number.POSITIVE_INFINITY;
+  }
   let end = start + count;
-  let sortCount = (sortBy === 'refCount') ? 10000 : count;
-  let sortStart = (sortBy === 'refCount') ? 0 : start;
+
   async.waterfall([
     (next) => {
-      accountDbo.getAccountsByRefCount((error, result) => {
+      accountDbo.getSortedAccountsByRefCount((error, result) => {
+        if (error) next({
+          status: 500,
+          message: 'Error while fetching data.'
+        }, null);
+        else next(null, result);
+      });
+    }, (leaderboard, next) => {
+      accountDbo.getSortedAccounts({
+        sortBy, start, count
+      }, (error, leaders) => {
         if (error) {
           next({
             status: 500,
             success: false,
-            message: 'Error while fetching data'
+            message: 'Error while fetching data.'
           }, null);
-        } else next(null, result);
+        } else next(null, leaderboard, leaders);
       });
-    },
-    (leaderboard, next) => {
-      accountDbo.getSortedAccounts({ sortBy, sortStart, sortCount }, (error, leaders) => {
-        if (error) {
-          next({
-            status: 500,
-            success: false,
-            message: 'Error while fetching data'
-          }, null);
-        } else {
-          next(null, leaderboard, leaders);
-        }
-      });
-    },
-    (leaderboard, leaders, next) => {
+    }, (leaderboard, leaders, next) => {
       if (sortBy === 'refCount') {
         let temp = {};
         let final = [];
@@ -332,15 +331,20 @@ let getLeaderBoard = (req, res) => {
         lodash.forEach(leaderboard,
           (lead) => {
             temp2[lead._id] = lead;
-            final.push({ details: temp[lead._id], ref: lead.refs });
+            final.push({
+              details: temp[lead._id],
+              ref: lead.refs
+            });
           });
         lodash.forEach(leaders,
           (leader) => {
             if (!temp2[leader.referralId]) {
-              final.push({ details: temp[leader.referralId], ref: [] });
+              final.push({
+                details: temp[leader.referralId],
+                ref: []
+              });
             }
           });
-
         final1 = final.slice(start, end);
         next(null, {
           status: 200,
@@ -355,11 +359,12 @@ let getLeaderBoard = (req, res) => {
         let final = [];
         lodash.forEach(leaders,
           (lead) => {
-            if (!temp[lead.referralId]) {
-              final.push({ devideId: lead.deviceId, referredBy: lead.referredBy, referralId: lead.referralId, refs: [] });
-            } else {
-              final.push({ devideId: lead.deviceId, referredBy: lead.referredBy, referralId: lead.referralId, refs: temp[lead.referralId].refs });
-            }
+            final.push({
+              devideId: lead.deviceId,
+              referredBy: lead.referredBy,
+              referralId: lead.referralId,
+              refs: temp[lead.referralId] ? temp[lead.referralId].refs : []
+            });
           });
         next(null, {
           status: 200,
