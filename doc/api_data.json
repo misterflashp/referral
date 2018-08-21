@@ -329,5 +329,70 @@
     "version": "0.0.0",
     "filename": "server/controllers/bonus.controller.js",
     "groupTitle": "Bonus"
+  },
+  {
+    "type": "get",
+    "url": "/leader",
+    "title": "To fetch leaderboard.",
+    "name": "getLeaderBoard",
+    "group": "Leaderboard",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sortBy",
+            "description": "<p>Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], and use +[attribute] for ascending, -[attribute] for descending.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "start",
+            "description": "<p>Number of records to skip, default value is 0 and use positive numbers.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "count",
+            "description": "<p>Number of records to return, default value is 100, use positive numbers.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ErrorWhileFetchingData",
+            "description": "<p>Error while fetching leaderboard.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "ErrorWhileFetchingData-Response:",
+          "content": "{\n  success: false,\n  message: 'Error while fetching data.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response: ",
+          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"devideId\": \"0000000000000000\",\n     \"referralId\": \"SENT-XXXXXXXX\",\n     \"refs\": [\n        \"SENT-XXXXXXXY\",\n        \"SENT-XXXXXXXZ\",\n        \"SENT-XXXXXXXW\",\n        \"SENT-XXXXXXXL\"\n       ]\n   }\n  ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/account.controller.js",
+    "groupTitle": "Leaderboard"
   }
 ]
