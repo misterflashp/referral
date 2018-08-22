@@ -258,7 +258,7 @@ let updateAccount = (req, res) => {
 * @apiParam {String} sortBy Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], default sortBy is 'refCount'.
 * @apiParam {Number} start Number of records to skip, default value is 0 and use positive numbers.
 * @apiParam {Number} count Number of records to return, default value is 10, use positive numbers.
-* @apiParam {String} order Order to sort [asc/des], Default sort [des].
+* @apiParam {String} order Order to sort [asc/desc], Default sort [desc].
 * @apiError ErrorWhileFetchingData Error while fetching leaderboard.
 * @apiErrorExample ErrorWhileFetchingData-Response:
 * {
@@ -272,7 +272,9 @@ let updateAccount = (req, res) => {
 *  "info": [
 *    {
 *      "devideId": "0000000000000000",
+*      "referredBy": "SENT-XXXXXXXX",
 *      "referralId": "SENT-XXXXXXXX",
+*      "addedOn":    "2018-08-08T07:30:04.969Z",
 *      "refs": [
 *         "SENT-XXXXXXXY",
 *         "SENT-XXXXXXXZ",
@@ -292,8 +294,8 @@ let getLeaderBoard = (req, res) => {
   if (!sortBy) sortBy = 'refCount';
   if (!start) start = 0;
   if (!count) count = 10;
-  if (!order) order = 'des';
-  order = (order === 'des')? -1 : 1;
+  if (!order) order = 'desc';
+  order = (order === 'desc') ? -1 : 1;
   order = parseInt(order, 10);
   start = parseInt(start, 10);
   count = parseInt(count, 10);
@@ -301,7 +303,7 @@ let getLeaderBoard = (req, res) => {
 
   async.waterfall([
     (next) => {
-      accountDbo.getSortedAccountsByRefCount(order,(error, result) => {
+      accountDbo.getSortedAccountsByRefCount(order, (error, result) => {
         if (error) next({
           status: 500,
           message: 'Error while fetching data.'
@@ -333,21 +335,34 @@ let getLeaderBoard = (req, res) => {
         lodash.forEach(leaderboard,
           (lead) => {
             temp2[lead._id] = lead;
-            final.push({
-              details: temp[lead._id],
-              ref: lead.refs
-            });
           });
+        if (order === -1) {
+          lodash.forEach(leaderboard,
+            (lead) => {
+              final.push(Object.assign(
+                temp[lead._id].toObject(), {
+                  refs: lead.refs
+                }));
+            });
+        }
         lodash.forEach(leaders,
           (leader) => {
             if (!temp2[leader.referralId]) {
-              final.push({
-                details: temp[leader.referralId],
-                ref: []
-              });
+              final.push(Object.assign(
+                temp[leader.referralId].toObject(), {
+                  refs: []
+                }));
             }
           });
-        console.log(start, end);
+        if (order === 1) {
+          lodash.forEach(leaderboard,
+            (lead) => {
+              final.push(Object.assign(
+                temp[lead._id].toObject(), {
+                  refs: lead.refs
+                }));
+            });
+        }
         final1 = final.slice(start, end);
         next(null, {
           status: 200,
