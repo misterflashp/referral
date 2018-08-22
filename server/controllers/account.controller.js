@@ -252,14 +252,14 @@ let updateAccount = (req, res) => {
 
 
 /**
-* @api {get} /leaderboard To fetch leaderboard.
-* @apiName getLeaderBoard
-* @apiGroup Leaderboard
+* @api {get} /dashboard To fetch dashboard.
+* @apiName getDashBoard
+* @apiGroup Dashboard
 * @apiParam {String} sortBy Attribute to sort, Available attributes [deviceId, referredBy, referralId, addedOn, refCount], default sortBy is 'refCount'.
 * @apiParam {Number} start Number of records to skip, default value is 0 and use positive numbers.
 * @apiParam {Number} count Number of records to return, default value is 10, use positive numbers.
 * @apiParam {String} order Order to sort [asc/desc], Default sort [desc].
-* @apiError ErrorWhileFetchingData Error while fetching leaderboard.
+* @apiError ErrorWhileFetchingData Error while fetching dashboard.
 * @apiErrorExample ErrorWhileFetchingData-Response:
 * {
 *   success: false,
@@ -286,7 +286,7 @@ let updateAccount = (req, res) => {
 * }
    
 */
-let getLeaderBoard = (req, res) => {
+let getDashBoard = (req, res) => {
   let { sortBy,
     start,
     count,
@@ -402,6 +402,147 @@ let getLeaderBoard = (req, res) => {
 
 
 /**
+* @api {get} /leaderboard To fetch leaderboard.
+* @apiName getLeaderBoard
+* @apiGroup Leaderboard
+* @apiError ErrorWhileFetchingData Error while fetching leaderboard.
+* @apiErrorExample ErrorWhileFetchingData-Response:
+* {
+*   success: false,
+*   message: 'Error while fetching [accounts/bonuses/sessionUsage/refCount].'
+* }
+* @apiSuccessExample Response: 
+* 
+* {
+*  "success": true,
+*  "info": [
+*    {
+*      "deviceId": 0000000000000000,
+*      "tokens":   0000000000000000,
+*      "referralId": "SENT-XXXXXXXX"
+*      "noOfReferrals": 0000000,
+*      "noOfSessions":  0000000,
+*      "totalUsage": XXXXXXXX
+*    }
+*   ]
+* }
+   
+*/
+let getLeaderBoard = (req, res) => {
+  async.waterfall([
+    (next) => {
+      accountDbo.getAccounts((error, accounts) => {
+        if (error) {
+          next({
+            status: 500,
+            message: 'Error while fetching accounts'
+          }, null);
+        } else next(null, accounts);
+      });
+    }, (accounts, next) => {
+      accountDbo.refCount((error, refCounts) => {
+        if (error) {
+          next({
+            status: 500,
+            message: 'Error while fetching refCounts'
+          }, null);
+        } else next(null, accounts, refCounts);
+      })
+    },
+    (accounts, refCounts, next) => {
+      bonusDbo.getTotalBonus((error, bonuses) => {
+        if (error) {
+          next({
+            status: 500,
+            message: 'Error while fetching bonuses'
+          }, null);
+        } else next(null, accounts, refCounts, bonuses);
+      })
+    }, (accounts, refCounts, bonuses, next) => {
+      sessionDbo.getTotalUsage((error, usage) => {
+        if (error) {
+          next({
+            status: 500,
+            message: 'Error while fetching usage'
+          }, null);
+        } else next(null, accounts, refCounts, bonuses, usage);
+      })
+    }, (accounts, refCounts, bonuses, usage, next) => {
+      let tmpAccounts = {};
+      let tmpBonus = {};
+      let tmpRef = {};
+      let tmpUsage = {};
+      let final = [];
+      let tmpFinal = {};
+      let final2 = [];
+      lodash.forEach(accounts,
+        (account) => {
+          tmpAccounts[account.deviceId] = account.referralId;
+        });
+      lodash.forEach(usage,
+        (use) => {
+          tmpUsage[use._id] = use;
+        });
+      lodash.forEach(bonuses,
+        (bonus) => {
+          tmpBonus[bonus._id] = bonus;
+        });
+      lodash.forEach(refCounts,
+        (ref) => {
+          tmpRef[ref._id] = ref.refsCount;
+        });
+      lodash.forEach(bonuses,
+        (bonus) => {
+          tmpFinal[bonus._id] = bonus._id;
+          final.push({
+            deviceId: bonus._id,
+            tokens: bonus.total,
+            referralId: tmpAccounts[bonus._id],
+            noOfReferrals: (tmpRef[tmpAccounts[bonus._id]]) ? tmpRef[tmpAccounts[bonus._id]] : 0
+          });
+        });
+      lodash.forEach(accounts,
+        (account) => {
+          if (!tmpFinal[account.deviceId]) {
+            final.push({
+              deviceId: account.deviceId,
+              tokens: 0,
+              referralId: account.referralId,
+              noOfReferrals: (tmpRef[account.referralId]) ? tmpRef[account.referralId] : 0
+            });
+          }
+        });
+      lodash.forEach(final,
+        (fin) => {
+          if (tmpUsage[fin.deviceId]) {
+            let obj = Object.assign(fin, {
+              noOfSessions: tmpUsage[fin.deviceId].count,
+              totalUsage: tmpUsage[fin.deviceId].down
+            });
+            final2.push(obj);
+          } else {
+            let obj = Object.assign(fin, {
+              noOfSessions: 0,
+              totalUsage: 0
+            });
+            final2.push(obj);
+          }
+        })
+      next(null, {
+        status: 200,
+        info: final2
+      });
+    }
+  ], (error, success) => {
+    let response = Object.assign({
+      success: !error
+    }, error || success);
+    let status = response.status;
+    delete (response.status);
+    res.status(status).send(response);
+  });
+}
+/**
 * @api {get} /accounts To get list of all accounts.
 * @apiName getAccount
 * @apiGroup Account
@@ -472,6 +613,7 @@ let getAccounts = (req, res) => {
 
 module.exports = {
   addAccount,
+  getDashBoard,
   getLeaderBoard,
   getAccount,
   getAccounts,

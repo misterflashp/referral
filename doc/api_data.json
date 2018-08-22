@@ -370,10 +370,10 @@
   },
   {
     "type": "get",
-    "url": "/leaderboard",
-    "title": "To fetch leaderboard.",
-    "name": "getLeaderBoard",
-    "group": "Leaderboard",
+    "url": "/dashboard",
+    "title": "To fetch dashboard.",
+    "name": "getDashBoard",
+    "group": "Dashboard",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -415,7 +415,7 @@
             "group": "Error 4xx",
             "optional": false,
             "field": "ErrorWhileFetchingData",
-            "description": "<p>Error while fetching leaderboard.</p>"
+            "description": "<p>Error while fetching dashboard.</p>"
           }
         ]
       },
@@ -432,6 +432,44 @@
         {
           "title": "Response: ",
           "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"deviceId\": \"0000000000000000\",\n     \"referredBy\": \"SENT-XXXXXXXX\",\n     \"referralId\": \"SENT-XXXXXXXX\",\n     \"addedOn\":    \"2018-08-08T07:30:04.969Z\",\n     \"refs\": [\n        \"SENT-XXXXXXXY\",\n        \"SENT-XXXXXXXZ\",\n        \"SENT-XXXXXXXW\",\n        \"SENT-XXXXXXXL\"\n       ]\n   }\n  ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/account.controller.js",
+    "groupTitle": "Dashboard"
+  },
+  {
+    "type": "get",
+    "url": "/leaderboard",
+    "title": "To fetch leaderboard.",
+    "name": "getLeaderBoard",
+    "group": "Leaderboard",
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ErrorWhileFetchingData",
+            "description": "<p>Error while fetching leaderboard.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "ErrorWhileFetchingData-Response:",
+          "content": "{\n  success: false,\n  message: 'Error while fetching [accounts/bonuses/sessionUsage/refCount].'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response: ",
+          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"deviceId\": 0000000000000000,\n     \"tokens\":   0000000000000000,\n     \"referralId\": \"SENT-XXXXXXXX\"\n     \"noOfReferrals\": 0000000,\n     \"noOfSessions\":  0000000,\n     \"totalUsage\": XXXXXXXX\n   }\n  ]\n}",
           "type": "json"
         }
       ]

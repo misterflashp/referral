@@ -28,14 +28,14 @@ let updateAccount = (req, res, next) => {
   else next();
 };
 
-let getLeaderBoard = (req, res, next) => {
-  let getLeaderBoardSchema = joi.object().keys({
+let getDashBoard = (req, res, next) => {
+  let getDashBoardSchema = joi.object().keys({
     sortBy: joi.string(),
     start: joi.number(),
     count: joi.number(),
     order: joi.string()
   });
-  let { error } = joi.validate(req.query, getLeaderBoardSchema);
+  let { error } = joi.validate(req.query, getDashBoardSchema);
   if (error) res.status(422).send({
     success: false,
     error
@@ -57,7 +57,7 @@ let getAccount = (req, res, next) => {
 
 module.exports = {
   addAccount,
-  getLeaderBoard,
+  getDashBoard,
   updateAccount,
   getAccount
 };

@@ -32,8 +32,24 @@ let getSession = (deviceId, cb) => {
       else cb(null, session);
     });
 };
-
+let getTotalUsage = (cb) => {
+  SessionModel.aggregate([{
+    $group: {
+      _id: '$device_Id',
+      count: { $sum: 1 },
+      down: { $sum: '$sent_bytes' }
+    }
+  }, {
+    $sort: {
+      down: -1
+    }
+  }]).exec((error, result) => {
+    if (error) cb(error, null);
+    else cb(null, result || []);
+  });
+}
 module.exports = {
+  getTotalUsage,
   initSession,
   addSession,
   getSession

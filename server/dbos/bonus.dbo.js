@@ -68,10 +68,32 @@ let updateBonus = (deviceId, updateObject, cb) => {
       else cb(null, result);
     });
 };
+let getTotalBonus = (cb) => {
+  BonusModel.aggregate([{
+    $group: {
+      _id: '$deviceId',
+      totalRefBonus: { $sum: { $sum: '$refBonusesInfo.amount' } },
+      totalSlcBonus: { $sum: { $sum: '$slcBonusesInfo.amount' } },
+      totalSncBonus: { $sum: { $sum: '$sncBonusesInfo.amount' } }
+    }
+  }, {
+    $project: {
+      total: { $sum: ['$totalRefBonus', '$totalSlcBonus', '$totalSncBonus'] }
+    }
+  }, {
+    $sort: {
+      total: -1
+    }
+  }]).exec((error, result) => {
+    if (error) cb(error, null);
+    else cb(null, result);
+  });
+};
 
 module.exports = {
   initBonus,
   addBonus,
+  getTotalBonus,
   getBonuses,
   updateBonus,
   updateBonusInfo
