@@ -251,7 +251,7 @@ let getBonusInfo = (req, res) => {
           ref: lodash.sum(lodash.map(refBonusesInfo, 'amount'))
         },
         refCount,
-        canClaim: (amount && referredBy) ? true : false,
+        canClaim: amount && referredBy && (sessionDate && new Date() >= new Date(sessionDate + CLAIM_PERIOD)) ? true : false,
         canClaimAfter: sessionDate ? new Date(sessionDate + CLAIM_PERIOD) : null
       });
     },
