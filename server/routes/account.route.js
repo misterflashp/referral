@@ -11,5 +11,7 @@ module.exports = (server) => {
 
   server.get('/accounts', accountContoller.getAccounts);
 
-  server.get('/leaderboard', accountValidation.getLeaderBoard, accountContoller.getLeaderBoard);
+  server.get('/dashboard', accountValidation.getDashBoard, accountContoller.getDashBoard);
+
+  server.get('/leaderboard', accountContoller.getLeaderBoard);
 };

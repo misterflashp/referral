@@ -51,9 +51,9 @@ let getSortedAccounts = (object, cb) => {
   let { tmpStart,
     tmpCount,
     order,
-  sortBy } = object;
+    sortBy } = object;
   let sortObj = {}; sortObj[sortBy] = order;
-  AccountModel.find({},{}, {
+  AccountModel.find({}, {}, {
     sort: sortObj,
     skip: tmpStart,
     limit: tmpCount
@@ -63,6 +63,29 @@ let getSortedAccounts = (object, cb) => {
   });
 };
 
+let refCount = (cb) => {
+  AccountModel.aggregate([{
+    $match: {
+      referredBy: { $ne: null }
+    }
+  }, {
+    $group: {
+      _id: '$referredBy',
+      refs: { $push: '$referralId' }
+    }
+  }, {
+    $project: {
+      _id: 1,
+      refs: 1,
+      refsCount: { $size: '$refs' }
+    }
+  }, {
+    $sort: { refsCount: -1 }
+  }], (error, result) => {
+    if (error) cb(error, null);
+    else cb(null, result);
+  });
+};
 let getSortedAccountsByRefCount = (order, cb) => {
   AccountModel.aggregate([{
     $match: {
@@ -91,6 +114,7 @@ module.exports = {
   addAccount,
   getAccount,
   getAccounts,
+  refCount,
   getSortedAccounts,
   getSortedAccountsByRefCount,
   getReferrals,
