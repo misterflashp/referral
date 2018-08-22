@@ -365,7 +365,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "order",
-            "description": "<p>Order to sort [asc/des], Default sort [des].</p>"
+            "description": "<p>Order to sort [asc/desc], Default sort [desc].</p>"
           }
         ]
       }
@@ -393,7 +393,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Response: ",
-          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"devideId\": \"0000000000000000\",\n     \"referralId\": \"SENT-XXXXXXXX\",\n     \"refs\": [\n        \"SENT-XXXXXXXY\",\n        \"SENT-XXXXXXXZ\",\n        \"SENT-XXXXXXXW\",\n        \"SENT-XXXXXXXL\"\n       ]\n   }\n  ]\n}",
+          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"devideId\": \"0000000000000000\",\n     \"referredBy\": \"SENT-XXXXXXXX\",\n     \"referralId\": \"SENT-XXXXXXXX\",\n     \"addedOn\":    \"2018-08-08T07:30:04.969Z\",\n     \"refs\": [\n        \"SENT-XXXXXXXY\",\n        \"SENT-XXXXXXXZ\",\n        \"SENT-XXXXXXXW\",\n        \"SENT-XXXXXXXL\"\n       ]\n   }\n  ]\n}",
           "type": "json"
         }
       ]
