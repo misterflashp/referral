@@ -271,7 +271,7 @@ let updateAccount = (req, res) => {
 *  "success": true,
 *  "info": [
 *    {
-*      "devideId": "0000000000000000",
+*      "deviceId": "0000000000000000",
 *      "referredBy": "SENT-XXXXXXXX",
 *      "referralId": "SENT-XXXXXXXX",
 *      "addedOn":    "2018-08-08T07:30:04.969Z",
@@ -378,9 +378,10 @@ let getLeaderBoard = (req, res) => {
         lodash.forEach(leaders,
           (lead) => {
             final.push({
-              devideId: lead.deviceId,
+              deviceId: lead.deviceId,
               referredBy: lead.referredBy,
               referralId: lead.referralId,
+              addedOn: lead.addedOn,
               refs: temp[lead.referralId] ? temp[lead.referralId].refs : []
             });
           });
@@ -399,6 +400,29 @@ let getLeaderBoard = (req, res) => {
     });
 };
 
+
+/**
+* @api {get} /accounts To get list of all accounts.
+* @apiName getAccount
+* @apiGroup Account
+* @apiError ErrorWhileFetchingAccounts Error while fetching accounts.
+* @apiErrorExample ErrorWhileFetchingAccounts-Response:
+* {
+*   success: false,
+*   message: 'Error occoured while fetching accounts.'
+* }
+
+* @apiSuccessExample Response: 
+* {
+*   success: true,
+*   account: {
+*     deviceId: String,
+*     referralId: String,
+*     addedOn: Date,
+*     refs: []
+*   }
+* }
+*/
 let getAccounts = (req, res) => {
   async.waterfall([
     (next) => {
