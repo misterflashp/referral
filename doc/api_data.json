@@ -127,6 +127,44 @@
     "groupTitle": "Account"
   },
   {
+    "type": "get",
+    "url": "/accounts",
+    "title": "To get list of all accounts.",
+    "name": "getAccount",
+    "group": "Account",
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ErrorWhileFetchingAccounts",
+            "description": "<p>Error while fetching accounts.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "ErrorWhileFetchingAccounts-Response:",
+          "content": "{\n  success: false,\n  message: 'Error occoured while fetching accounts.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response: ",
+          "content": "{\n  success: true,\n  account: {\n    deviceId: String,\n    referralId: String,\n    addedOn: Date,\n    refs: []\n  }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/account.controller.js",
+    "groupTitle": "Account"
+  },
+  {
     "type": "put",
     "url": "/account",
     "title": "To update account address.",
@@ -393,7 +431,7 @@
       "examples": [
         {
           "title": "Response: ",
-          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"devideId\": \"0000000000000000\",\n     \"referredBy\": \"SENT-XXXXXXXX\",\n     \"referralId\": \"SENT-XXXXXXXX\",\n     \"addedOn\":    \"2018-08-08T07:30:04.969Z\",\n     \"refs\": [\n        \"SENT-XXXXXXXY\",\n        \"SENT-XXXXXXXZ\",\n        \"SENT-XXXXXXXW\",\n        \"SENT-XXXXXXXL\"\n       ]\n   }\n  ]\n}",
+          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"deviceId\": \"0000000000000000\",\n     \"referredBy\": \"SENT-XXXXXXXX\",\n     \"referralId\": \"SENT-XXXXXXXX\",\n     \"addedOn\":    \"2018-08-08T07:30:04.969Z\",\n     \"refs\": [\n        \"SENT-XXXXXXXY\",\n        \"SENT-XXXXXXXZ\",\n        \"SENT-XXXXXXXW\",\n        \"SENT-XXXXXXXL\"\n       ]\n   }\n  ]\n}",
           "type": "json"
         }
       ]

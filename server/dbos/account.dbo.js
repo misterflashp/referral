@@ -53,7 +53,7 @@ let getSortedAccounts = (object, cb) => {
     order,
   sortBy } = object;
   let sortObj = {}; sortObj[sortBy] = order;
-  AccountModel.find({}, { _id: 0 }, {
+  AccountModel.find({},{}, {
     sort: sortObj,
     skip: tmpStart,
     limit: tmpCount
