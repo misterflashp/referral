@@ -1,5 +1,5 @@
 let SessionModel = require('../models/session.model');
-let RefSessionModel = require('../models/ref_session.model');
+let RefSessionModel = require('../models/refSession.model');
 
 let initSession = (details, cb) => {
   let session = new SessionModel(details);
