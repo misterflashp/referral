@@ -441,14 +441,16 @@ let getLeaderBoard = (req, res) => {
         } else next(null, accounts);
       });
     }, (accounts, next) => {
-      accountDbo.refCount((error, refCounts) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching refCounts'
-          }, null);
-        } else next(null, accounts, refCounts);
-      })
+      let order = -1;
+      accountDbo.getSortedAccountsByRefCount(order,
+        (error, refCounts) => {
+          if (error) {
+            next({
+              status: 500,
+              message: 'Error while fetching refCounts'
+            }, null);
+          } else next(null, accounts, refCounts);
+        });
     },
     (accounts, refCounts, next) => {
       bonusDbo.getTotalBonus((error, bonuses) => {
