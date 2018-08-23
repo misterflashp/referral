@@ -1,5 +1,5 @@
 let SessionModel = require('../models/session.model');
-
+let RefSessionModel = require('../models/ref_session.model');
 
 let initSession = (details, cb) => {
   let session = new SessionModel(details);
@@ -33,9 +33,9 @@ let getSession = (deviceId, cb) => {
     });
 };
 let getTotalUsage = (cb) => {
-  SessionModel.aggregate([{
+  RefSessionModel.aggregate([{
     $group: {
-      _id: '$device_Id',
+      _id: '$device_id',
       count: { $sum: 1 },
       down: { $sum: '$sent_bytes' }
     }

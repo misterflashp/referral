@@ -417,12 +417,13 @@ let getDashBoard = (req, res) => {
 *  "success": true,
 *  "info": [
 *    {
+*      "index":   00000000
 *      "deviceId": 0000000000000000,
 *      "tokens":   0000000000000000,
 *      "referralId": "SENT-XXXXXXXX"
-*      "noOfReferrals": 0000000,
-*      "noOfSessions":  0000000,
-*      "totalUsage": XXXXXXXX
+*      "noOfReferrals": 00000000,
+*      "noOfSessions":  00000000,
+*      "totalUsage": XXXXXXXX (In bytes)
 *    }
 *   ]
 * }
@@ -475,6 +476,7 @@ let getLeaderBoard = (req, res) => {
       let final = [];
       let tmpFinal = {};
       let final2 = [];
+      let index = 0;
       lodash.forEach(accounts,
         (account) => {
           tmpAccounts[account.deviceId] = account.referralId;
@@ -494,7 +496,9 @@ let getLeaderBoard = (req, res) => {
       lodash.forEach(bonuses,
         (bonus) => {
           tmpFinal[bonus._id] = bonus._id;
+          index++;
           final.push({
+            index: index,
             deviceId: bonus._id,
             tokens: bonus.total,
             referralId: tmpAccounts[bonus._id],
@@ -504,7 +508,9 @@ let getLeaderBoard = (req, res) => {
       lodash.forEach(accounts,
         (account) => {
           if (!tmpFinal[account.deviceId]) {
+            index++;
             final.push({
+              index: index,
               deviceId: account.deviceId,
               tokens: 0,
               referralId: account.referralId,
