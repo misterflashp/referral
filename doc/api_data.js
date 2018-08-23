@@ -469,7 +469,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Response: ",
-          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"deviceId\": 0000000000000000,\n     \"tokens\":   0000000000000000,\n     \"referralId\": \"SENT-XXXXXXXX\"\n     \"noOfReferrals\": 0000000,\n     \"noOfSessions\":  0000000,\n     \"totalUsage\": XXXXXXXX\n   }\n  ]\n}",
+          "content": "\n{\n \"success\": true,\n \"info\": [\n   {\n     \"index\":   00000000\n     \"deviceId\": 0000000000000000,\n     \"tokens\":   0000000000000000,\n     \"referralId\": \"SENT-XXXXXXXX\"\n     \"noOfReferrals\": 00000000,\n     \"noOfSessions\":  00000000,\n     \"totalUsage\": XXXXXXXX (In bytes)\n   }\n  ]\n}",
           "type": "json"
         }
       ]
