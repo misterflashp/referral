@@ -14,4 +14,9 @@ module.exports = (server) => {
   server.get('/dashboard', accountValidation.getDashBoard, accountContoller.getDashBoard);
 
   server.get('/leaderboard', accountContoller.getLeaderBoard);
+
+  server.get('/leaderboard/vars', accountContoller.leaderVariable);
+
+  server.get('/dashboard/vars', accountContoller.dashVariable);
+
 };
