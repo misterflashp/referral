@@ -4,8 +4,17 @@ let accountDbo = require('../dbos/account.dbo');
 let bonusDbo = require('../dbos/bonus.dbo');
 let sessionDbo = require('../dbos/session.dbo');
 let accountHelper = require('../helpers/account.helper');
+let leaderVariables = require('../../config/leaderboard');
 
+let leaderVariable = (req, res) =>{
+  response= leaderVariables.leaderboard;
+  res.status(200).send(response);
+}
 
+let dashVariable = (req, res) =>{
+  response= leaderVariables.dashboard;
+  res.status(200).send(response);
+}
 /**
 * @api {post} /account To add account.
 * @apiName addAccount
@@ -441,14 +450,16 @@ let getLeaderBoard = (req, res) => {
         } else next(null, accounts);
       });
     }, (accounts, next) => {
-      accountDbo.refCount((error, refCounts) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching refCounts'
-          }, null);
-        } else next(null, accounts, refCounts);
-      })
+      let order = -1;
+      accountDbo.getSortedAccountsByRefCount(order,
+        (error, refCounts) => {
+          if (error) {
+            next({
+              status: 500,
+              message: 'Error while fetching refCounts'
+            }, null);
+          } else next(null, accounts, refCounts);
+        });
     },
     (accounts, refCounts, next) => {
       bonusDbo.getTotalBonus((error, bonuses) => {
@@ -621,6 +632,8 @@ module.exports = {
   addAccount,
   getDashBoard,
   getLeaderBoard,
+  leaderVariable,
+  dashVariable,
   getAccount,
   getAccounts,
   updateAccount
