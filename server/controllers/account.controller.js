@@ -218,11 +218,12 @@ let updateAccount = (req, res) => {
           });
         });
     }, (account, next) => {
-      if (account.address) next({
+      /* if (account.address) next({
         status: 400,
         message: 'Account address already exists.'
       });
-      else next(null);
+      else next(null); */
+      next(null);
     }, (next) => {
       accountDbo.getAccount({ address },
         (error, account) => {
