@@ -36,7 +36,7 @@ let updateVariable = (req, res) => {
         else {
           next(null, {
             status: 200,
-            message: result
+            message: "Variable info saved successfully."
           });
         }
       });
