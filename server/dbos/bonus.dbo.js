@@ -14,8 +14,7 @@ let addBonus = (deviceId, bonusType, bonus, cb) => {
     deviceId
   }, {
       $push: {
-        [bonusType === 'SNC' ? 'sncBonusesInfo' :
-          bonusType === 'SLC' ? 'slcBonusesInfo' : 'refBonusesInfo']: bonus
+        [bonusType === 'SLC' ? 'slcBonusesInfo' : 'refBonusesInfo']: bonus
       }
     }, (error, result) => {
       if (error) cb(error, null);
@@ -34,17 +33,18 @@ let getBonuses = (deviceId, cb) => {
     });
 };
 
-let updateBonusInfo = (deviceId, bonusType, txHash, cb) => {
-  let key = bonusType === 'SNC' ? 'sncBonusesInfo' : bonusType === 'SLC' ? 'slcBonusesInfo' : 'refBonusesInfo';
+let updateBonusInfo = (deviceId, txHash, cb) => {
   BonusModel.find({
     deviceId
   }, {
       '_id': 0
     }).then((docs) => {
       docs.forEach((doc) => {
-        doc[key].forEach((bonus, index) => {
-          if (!bonus.txHash) doc[key][index].txHash = txHash;
+        doc['refBonusesInfo'].forEach((bonus, index) => {
+          if (!bonus.txHash) doc['refBonusesInfo'][index].txHash = txHash;
         });
+        if (doc['slcBonusesInfo'].length && !doc['slcBonusesInfo'][0].txHash)
+          doc['slcBonusesInfo'][0].txHash = txHash;
         doc = doc.toObject();
         BonusModel.findOneAndUpdate({
           deviceId
@@ -58,27 +58,16 @@ let updateBonusInfo = (deviceId, bonusType, txHash, cb) => {
     });
 };
 
-let updateBonus = (deviceId, updateObject, cb) => {
-  BonusModel.findOneAndUpdate({
-    deviceId
-  }, {
-      $push: updateObject
-    }, (error, result) => {
-      if (error) cb(error, null);
-      else cb(null, result);
-    });
-};
 let getTotalBonus = (cb) => {
   BonusModel.aggregate([{
     $group: {
       _id: '$deviceId',
       totalRefBonus: { $sum: { $sum: '$refBonusesInfo.amount' } },
-      totalSlcBonus: { $sum: { $sum: '$slcBonusesInfo.amount' } },
-      totalSncBonus: { $sum: { $sum: '$sncBonusesInfo.amount' } }
+      totalSlcBonus: { $sum: { $sum: '$slcBonusesInfo.amount' } }
     }
   }, {
     $project: {
-      total: { $sum: ['$totalRefBonus', '$totalSlcBonus', '$totalSncBonus'] }
+      total: { $sum: ['$totalRefBonus', '$totalSlcBonus'] }
     }
   }, {
     $sort: {
@@ -95,6 +84,5 @@ module.exports = {
   addBonus,
   getTotalBonus,
   getBonuses,
-  updateBonus,
   updateBonusInfo
 };

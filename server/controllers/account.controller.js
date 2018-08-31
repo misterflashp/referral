@@ -2,7 +2,6 @@ let async = require('async');
 let lodash = require('lodash');
 let accountDbo = require('../dbos/account.dbo');
 let bonusDbo = require('../dbos/bonus.dbo');
-let sessionDbo = require('../dbos/session.dbo');
 let accountHelper = require('../helpers/account.helper');
 /**
 * @api {post} /account To add account.
@@ -10,7 +9,7 @@ let accountHelper = require('../helpers/account.helper');
 * @apiGroup Account
 * @apiParam {String} deviceId Device ID of client.
 * @apiParam {String} address Account address of client.
-  @apiParam {String} referredBy Referral ID which is valid.
+* @apiParam {String} referredBy Referral ID which is valid.
 * @apiError DeviceIdAlreadyExists Provided deviceId already exists 
 * @apiErrorExample DeviceIdAlreadyExists-Response:
 * {
@@ -75,11 +74,6 @@ let addAccount = (req, res) => {
       }
     }, (next) => {
       bonusDbo.initBonus({ deviceId },
-        () => {
-          next(null);
-        });
-    }, (next) => {
-      sessionDbo.initSession({ deviceId },
         () => {
           next(null);
         });
@@ -200,19 +194,12 @@ let updateAccount = (req, res) => {
             status: 500,
             message: 'Error occurred while checking device Id.'
           });
-          else if (account) next(null, account);
+          else if (account) next(null);
           else next({
             status: 400,
             message: 'Device is not registered.'
           });
         });
-    }, (account, next) => {
-      /* if (account.address) next({
-        status: 400,
-        message: 'Account address already exists.'
-      });
-      else next(null); */
-      next(null);
     }, (next) => {
       accountDbo.getAccount({ address },
         (error, account) => {
@@ -222,7 +209,7 @@ let updateAccount = (req, res) => {
           });
           else if (account) next({
             status: 400,
-            message: 'Address already associated with another device.'
+            message: 'Address already associated with a device.'
           });
           else next(null);
         });
@@ -259,7 +246,6 @@ let updateAccount = (req, res) => {
 *   success: false,
 *   message: 'Error occoured while fetching accounts.'
 * }
-
 * @apiSuccessExample Response: 
 * {
 *   success: true,
@@ -317,7 +303,6 @@ let getAccounts = (req, res) => {
     res.status(status).send(response);
   });
 };
-
 
 module.exports = {
   addAccount,

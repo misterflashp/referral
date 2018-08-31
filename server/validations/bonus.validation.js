@@ -1,6 +1,18 @@
 let joi = require('joi');
 
 
+let addBonus = (req, res, next) => {
+  let addBonusSchema = joi.object().keys({
+    deviceId: joi.string().required()
+  });
+  let { error } = joi.validate(req.body, addBonusSchema);
+  if (error) res.status(422).send({
+    success: false,
+    error
+  });
+  else next();
+};
+
 let bonusClaim = (req, res, next) => {
   let bonusClaimSchema = joi.object().keys({
     deviceId: joi.string().required()
@@ -27,5 +39,6 @@ let getBonusInfo = (req, res, next) => {
 
 module.exports = {
   bonusClaim,
-  getBonusInfo
+  getBonusInfo,
+  addBonus
 };
