@@ -36,7 +36,7 @@ let addRefBonus = (referralId, _deviceId, cb) => {
           deviceId: _deviceId,
           amount: REF_BONUS,
           txHash: null,
-          onDate: null
+          onDate: new Date(),
         }, (error, result) => {
           if (error) next(error);
           else next(null);
@@ -85,7 +85,7 @@ let addBonus = (req, res) => {
         bonusDbo.addBonus(deviceId, 'SLC', {
           amount: SLC_BONUS,
           txHash: null,
-          onDate: null
+          onDate: new Date()
         }, (error, result) => {
           if (error) next({
             status: 500,
