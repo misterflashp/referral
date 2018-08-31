@@ -65,17 +65,21 @@ let getDashBoard = (req, res) => {
         }, (leaderboard, next) => {
             let tmpStart = sortBy === 'refCount' ? 0 : start;
             let tmpCount = sortBy === 'refCount' ? 1000000 : count;
-            accountDbo.getSortedAccounts({ order, sortBy, tmpStart, tmpCount },
-                (error, leaders) => {
-                    if (error) {
-                        next({
-                            status: 500,
-                            success: false,
-                            message: 'Error while fetching data.'
-                        }, null);
-                    } else next(null, leaderboard, leaders);
-                });
+            accountDbo.getSortedAccounts({
+                order, sortBy,
+                start: tmpStart,
+                count: tmpCount
+            }, (error, leaders) => {
+                if (error) {
+                    next({
+                        status: 500,
+                        success: false,
+                        message: 'Error while fetching data.'
+                    }, null);
+                } else next(null, leaderboard, leaders);
+            });
         }, (leaderboard, leaders, next) => {
+            console.log(leaderboard, leaders)
             if (sortBy === 'refCount') {
                 let temp = {};
                 let final = [];
@@ -157,18 +161,18 @@ let dashSearch = (req, res) => {
         searchKey,
         feilds } = req.query;
     let search = {};
-    feilds = ['deviceId','b','c'];
-    if(feilds.length){
+    feilds = ['deviceId', 'b', 'c'];
+    if (feilds.length) {
         lodash.forEach(feilds,
-        (feild)=>{
-           // search[feild] =  { $regex: searchKey, $options: "i" } ;
-            
-        });
-        lodash.forEach(search,
-            (ser)=>{
-            console.log(ser);
+            (feild) => {
+                // search[feild] =  { $regex: searchKey, $options: "i" } ;
+
             });
-                
+        lodash.forEach(search,
+            (ser) => {
+                console.log(ser);
+            });
+
     }
     // console.log(search);
     let arr = [
