@@ -437,7 +437,7 @@ define({ "api": [
       ]
     },
     "version": "0.0.0",
-    "filename": "server/controllers/account.controller.js",
+    "filename": "server/controllers/dashboard.controller.js",
     "groupTitle": "Dashboard"
   },
   {
@@ -446,6 +446,19 @@ define({ "api": [
     "title": "To fetch leaderboard.",
     "name": "getLeaderBoard",
     "group": "Leaderboard",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sortBy",
+            "description": "<p>Attribute to sort, Available attributes [bandwidth, tokens, referral], default sortBy is 'tokens'.</p>"
+          }
+        ]
+      }
+    },
     "error": {
       "fields": {
         "Error 4xx": [
@@ -475,7 +488,144 @@ define({ "api": [
       ]
     },
     "version": "0.0.0",
-    "filename": "server/controllers/account.controller.js",
+    "filename": "server/controllers/leaderboard.controller.js",
     "groupTitle": "Leaderboard"
+  },
+  {
+    "type": "get",
+    "url": "/variable",
+    "title": "To get a variable information.",
+    "name": "getVariable",
+    "group": "Variables",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Optional name of the variable.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "appCode",
+            "description": "<p>Type of app used [SLC/SNC].</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "varType",
+            "description": "<p>Variable used in [ DASH : dashboard / LEAD : leaderboard ].</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ErrorWhileFetchingInfo",
+            "description": "<p>Error while fetching variable.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "ErrorWhileFetchingInfo-Response:",
+          "content": "{\n  success: false,\n  message: 'Error while fetching information'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response : ",
+          "content": "{\n  success: true,\n  info: {\n          \"appCode\": \"SLC\",\n          \"name\": \"title\",\n          \"varType\": \"LEAD\",\n          \"updatedOn\": \"2018-08-28T11:37:05.943Z\",\n          \"value\": \"REFERRAL LEADERBOARD\"\n      }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/variable.controller.js",
+    "groupTitle": "Variables"
+  },
+  {
+    "type": "post/put",
+    "url": "/variable",
+    "title": "To add or update a variable.",
+    "name": "updateVariable",
+    "group": "Variables",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of the variable.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "value",
+            "description": "<p>Value of the variable.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "appCode",
+            "description": "<p>Type of app used [SLC/SNC].</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "varType",
+            "description": "<p>Variable used in [ DASH : dashboard / LEAD : leaderboard ].</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ErrorWhileSavingInfo",
+            "description": "<p>Error while saving information.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "ErrorWhileSavingInfo-Response:",
+          "content": "{\n  success: false,\n  message: 'Error while saving information'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response : ",
+          "content": "{\n  success: true,\n  message: \"Variable info saved successfully.\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/variable.controller.js",
+    "groupTitle": "Variables"
   }
 ] });

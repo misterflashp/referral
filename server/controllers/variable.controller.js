@@ -1,23 +1,24 @@
 let async = require('async');
+let lodash = require('lodash');
 let variableDbo = require('../dbos/variable.dbo');
 /**
-* @api {post} /variable To add a message.
-* @apiName addMessage
-* @apiGroup Message
-* @apiParam {String} message Message to be saved.
-* @apiError ErrorWhileAddingMessage Error while adding the message.
-* @apiErrorExample ErrorWhileAddingMessage-Response:
+* @api {post/put} /variable To add or update a variable.
+* @apiName updateVariable
+* @apiGroup Variables
+* @apiParam {String} name Name of the variable.
+* @apiParam {String} value Value of the variable.
+* @apiParam {String} appCode Type of app used [SLC/SNC].
+* @apiParam {String} varType Variable used in [ DASH : dashboard / LEAD : leaderboard ].
+* @apiError ErrorWhileSavingInfo Error while saving information.
+* @apiErrorExample ErrorWhileSavingInfo-Response:
 * {
 *   success: false,
-*   message: 'Error while saving message'
+*   message: 'Error while saving information'
 * }
 *@apiSuccessExample Response : 
 * {
 *   success: true,
-*   list: {
-*    "message": "This is the message",
-*    "updatedOn": "2018-08-17T12:36:45.361Z"
-*   }
+*   message: "Variable info saved successfully.",
 * }
 */
 
@@ -31,7 +32,7 @@ let updateVariable = (req, res) => {
       variableDbo.updateVariable({ name, value, varType, appCode, updatedOn }, (error, result) => {
         if (error) next({
           status: 500,
-          message: 'error while saving'
+          message: '  Error while saving variable information'
         }, null);
         else {
           next(null, {
@@ -50,6 +51,31 @@ let updateVariable = (req, res) => {
     });
 }
 
+/**
+* @api {get} /variable To get a variable information.
+* @apiName getVariable
+* @apiGroup Variables
+* @apiParam {String} name Optional name of the variable.
+* @apiParam {String} appCode Type of app used [SLC/SNC].
+* @apiParam {String} varType Variable used in [ DASH : dashboard / LEAD : leaderboard ].
+* @apiError ErrorWhileFetchingInfo Error while fetching variable.
+* @apiErrorExample ErrorWhileFetchingInfo-Response:
+* {
+*   success: false,
+*   message: 'Error while fetching information'
+* }
+*@apiSuccessExample Response : 
+* {
+*   success: true,
+*   info: {
+*           "appCode": "SLC",
+*           "name": "title",
+*           "varType": "LEAD",
+*           "updatedOn": "2018-08-28T11:37:05.943Z",
+*           "value": "REFERRAL LEADERBOARD"
+*       }
+* }
+*/
 let getVariable = (req, res) => {
   let {
     name, appCode, varType } = req.query;
@@ -70,6 +96,10 @@ let getVariable = (req, res) => {
       }
       else {
         variableDbo.getVariable({ appCode, varType }, (error, result) => {
+          // let object = {};
+          // lodash.forEach(result,element => {
+          //       object[element.name] = element.value  
+          // });
           if (error) next({
             status: 500,
             message: 'Error while fetching variables'
