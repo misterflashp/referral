@@ -48,15 +48,15 @@ let getReferrals = (referralId, cb) => {
 };
 
 let getSortedAccounts = (object, cb) => {
-  let { tmpStart,
-    tmpCount,
+  let { start,
+    count,
     order,
     sortBy } = object;
   let sortObj = {}; sortObj[sortBy] = order;
   AccountModel.find({}, {}, {
     sort: sortObj,
-    skip: tmpStart,
-    limit: tmpCount
+    skip: start,
+    limit: count
   }, (error, result) => {
     if (error) cb(error, null);
     else cb(null, result || []);

@@ -7,19 +7,10 @@ let bonusSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
-  sncBonusesInfo: [
-    /* {
-      amount: number, // required
-      txHash: string,
-      sessionNumber: number, // required
-      onDate: Date
-    } */
-  ],
   slcBonusesInfo: [
     /* {
       amount: number, // required
       txHash: string,
-      sessionNumber: number // required
       onDate: Date,
     } */
   ],
