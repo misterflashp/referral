@@ -9,6 +9,7 @@ let sessionDbo = require('../dbos/session.dbo');
 * @api {get} /leaderboard To fetch leaderboard.
 * @apiName getLeaderBoard
 * @apiGroup Leaderboard
+* @apiParam {String} sortBy Attribute to sort, Available attributes [bandwidth, tokens, referral], default sortBy is 'tokens'.
 * @apiError ErrorWhileFetchingData Error while fetching leaderboard.
 * @apiErrorExample ErrorWhileFetchingData-Response:
 * {
@@ -34,6 +35,8 @@ let sessionDbo = require('../dbos/session.dbo');
    
 */
 let getLeaderBoard = (req, res) => {
+  let { sortBy } = req.query;
+  sortBy = (sortBy) ? sortBy : "tokens";
   async.waterfall([
     (next) => {
       accountDbo.getAccounts((error, accounts) => {
@@ -99,51 +102,105 @@ let getLeaderBoard = (req, res) => {
         (ref) => {
           tmpRef[ref._id] = ref.refsCount;
         });
-      lodash.forEach(bonuses,
-        (bonus) => {
-          tmpFinal[bonus._id] = bonus._id;
-          index++;
-          final.push({
-            index: index,
-            deviceId: bonus._id,
-            tokens: bonus.total,
-            referralId: tmpAccounts[bonus._id],
-            noOfReferrals: (tmpRef[tmpAccounts[bonus._id]]) ? tmpRef[tmpAccounts[bonus._id]] : 0
+      if (sortBy === 'bandwidth') {
+        lodash.forEach(usage,
+          (use) => {
+            index++;
+            tmpFinal[use._id] = use._id;
+            final.push({
+              rank:index,
+              referralId:tmpAccounts[use._id],
+              totalUsage: use.down
+            });
           });
+          lodash.forEach(accounts,
+          (account)=>{
+            if (!tmpFinal[account.deviceId]) {
+              index++;
+              final.push({
+                rank: index,
+                referralId: account.referralId,
+                totalUsage: 0
+              });
+            }
+          });
+          next(null,{
+            status:200,
+            info:final
+          });
+      }else if(sortBy==='referral'){
+        lodash.forEach(refCounts,
+        (ref)=>{
+          index++;
+          tmpFinal[ref._id]=ref._id;
+          final.push({
+            rank:index,
+            referralId:ref._id,
+            noOfReferrals: ref.refsCount
+          })
         });
-      lodash.forEach(accounts,
-        (account) => {
-          if (!tmpFinal[account.deviceId]) {
+        lodash.forEach(accounts,
+          (account)=>{
+            if (!tmpFinal[account.referralId]) {
+              index++;
+              final.push({
+                rank: index,
+                referralId: account.referralId,
+                noOfReferrals: 0
+              });
+            }
+          });
+          next(null,{
+            status:200,
+            info:final
+          });
+      }else {
+        lodash.forEach(bonuses,
+          (bonus) => {
+            tmpFinal[bonus._id] = bonus._id;
             index++;
             final.push({
               index: index,
-              deviceId: account.deviceId,
-              tokens: 0,
-              referralId: account.referralId,
-              noOfReferrals: (tmpRef[account.referralId]) ? tmpRef[account.referralId] : 0
+              deviceId: bonus._id,
+              tokens: bonus.total,
+              referralId: tmpAccounts[bonus._id],
+              noOfReferrals: (tmpRef[tmpAccounts[bonus._id]]) ? tmpRef[tmpAccounts[bonus._id]] : 0
             });
-          }
+          });
+        lodash.forEach(accounts,
+          (account) => {
+            if (!tmpFinal[account.deviceId]) {
+              index++;
+              final.push({
+                index: index,
+                deviceId: account.deviceId,
+                tokens: 0,
+                referralId: account.referralId,
+                noOfReferrals: (tmpRef[account.referralId]) ? tmpRef[account.referralId] : 0
+              });
+            }
+          });
+        lodash.forEach(final,
+          (fin) => {
+            if (tmpUsage[fin.deviceId]) {
+              let obj = Object.assign(fin, {
+                noOfSessions: tmpUsage[fin.deviceId].count,
+                totalUsage: tmpUsage[fin.deviceId].down
+              });
+              final2.push(obj);
+            } else {
+              let obj = Object.assign(fin, {
+                noOfSessions: 0,
+                totalUsage: 0
+              });
+              final2.push(obj);
+            }
+          });
+        next(null, {
+          status: 200,
+          info: final2
         });
-      lodash.forEach(final,
-        (fin) => {
-          if (tmpUsage[fin.deviceId]) {
-            let obj = Object.assign(fin, {
-              noOfSessions: tmpUsage[fin.deviceId].count,
-              totalUsage: tmpUsage[fin.deviceId].down
-            });
-            final2.push(obj);
-          } else {
-            let obj = Object.assign(fin, {
-              noOfSessions: 0,
-              totalUsage: 0
-            });
-            final2.push(obj);
-          }
-        })
-      next(null, {
-        status: 200,
-        info: final2
-      });
+      } 
     }
   ], (error, success) => {
     let response = Object.assign({

@@ -20,16 +20,6 @@ let updateVariable = (object, cb) => {
     })
 
 }
-// let updateVariable = (object,cb) =>{
-//     let { name,
-//     value, updatedOn } = object;
-//     VariableModel.findOneAndUpdate({ name },{
-//             $set: { 'value':value, 'updatedOn': updatedOn } }, (error, result) => {
-//                 if (error) cb(error, null);
-//                 else cb(null, result || []);
-//             }
-//     );
-// }
 
 module.exports = {
   getVariable,
