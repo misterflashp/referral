@@ -15,6 +15,21 @@ let getDashBoard = (req, res, next) => {
   else next();
 };
 
+let dashSearch = (req, res, next) => {
+  let dashSearchSchema = joi.object().keys({
+    feilds: joi.array(),
+    searchKey: joi.string()
+  });
+  let { error } = joi.validate(req.query, dashSearchSchema);
+  if (error) res.status(422).send({
+    success: false,
+    error
+  });
+  else next();
+};
+
+
 module.exports = {
-  getDashBoard
+  getDashBoard,
+  dashSearch
 };

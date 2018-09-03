@@ -79,7 +79,6 @@ let getDashBoard = (req, res) => {
                 } else next(null, leaderboard, leaders);
             });
         }, (leaderboard, leaders, next) => {
-            console.log(leaderboard, leaders)
             if (sortBy === 'refCount') {
                 let temp = {};
                 let final = [];
@@ -156,33 +155,53 @@ let getDashBoard = (req, res) => {
         });
 };
 
+/**
+* @api {post} /dashboard/search To search dashboard.
+* @apiName dashSearch
+* @apiGroup Dashboard
+* @apiParam {Array} feilds Attributes to search in, Available attributes [deviceId, referredBy, referralId, address], default search is in all attributes.
+* @apiParam {String} searchKey Key to search.
+* @apiError ErrorWhileSearchingData Error while searching dashboard.
+* @apiErrorExample ErrorWhileSearchingData-Response:
+* {
+*   success: false,
+*   message: 'Error while searching data.'
+* }
+* @apiSuccessExample Response: 
+* 
+* {
+*  "success": true,
+*  "info": [
+*    {
+*      "deviceId": "0000000000000000",
+*      "referredBy": "SENT-XXXXXXXX",
+*      "address": "0x8d4HHHE8DeE87a191dD02E52639a3af1A678UDJS"
+*      "referralId": "SENT-XXXXXXXX",
+*      "addedOn":    "2018-08-08T07:30:04.969Z"
+*    }
+*   ]
+* }
+*/
 let dashSearch = (req, res) => {
     let {
         searchKey,
-        feilds } = req.query;
-    let search = {};
-    feilds = ['deviceId', 'b', 'c'];
-    if (feilds.length) {
+        feilds } = req.body;
+    let search = { $regex: searchKey, $options: "i" };
+    let arr = [];
+    if (feilds && feilds.length) {
         lodash.forEach(feilds,
             (feild) => {
-                // search[feild] =  { $regex: searchKey, $options: "i" } ;
-
+                let obj = {};
+                obj[feild] = search;
+                arr.push(obj);
             });
-        lodash.forEach(search,
-            (ser) => {
-                console.log(ser);
-            });
-
+    } else {
+        arr = [{ referralId: search }, { referredBy: search },
+        { deviceId: search }, { address: search },];
     }
-    // console.log(search);
-    let arr = [
-        { referralId: { $regex: searchKey, $options: "i" } },
-        { referredBy: { $regex: searchKey, $options: "i" } },
-        { deviceId: { $regex: searchKey, $options: "i" } },
-    ];
     async.waterfall([
         (next) => {
-            dashBoardDbo.searchByText(searchKey, arr, (error, result) => {
+            dashBoardDbo.searchByText(arr, (error, result) => {
                 if (error) next({
                     status: 500,
                     message: 'Error while searching '
