@@ -154,6 +154,7 @@ let addBonus = (req, res) => {
 let bonusClaim = (req, res) => {
   let { deviceId } = req.body;
   let address = null;
+  let referredBy = null;
   async.waterfall([
     (next) => {
       if (new Date() <= CLAIM_AFTER) next({
@@ -170,6 +171,7 @@ let bonusClaim = (req, res) => {
           });
           else if (account) {
             address = account.address;
+            referredBy = account.referredBy;
             next(null);
           } else next({
             status: 400,
@@ -181,6 +183,12 @@ let bonusClaim = (req, res) => {
       else next({
         status: 400,
         message: 'No account address exists.'
+      });
+    }, (next) => {
+      if (referredBy) next(null);
+      else next({
+        status: 400,
+        message: 'No referred by exists.'
       });
     }, (next) => {
       bonusDbo.getBonuses(deviceId,
@@ -261,6 +269,7 @@ let getBonusInfo = (req, res) => {
   let { deviceId } = req.query;
   let referrals = [];
   let referralId = null;
+  let referredBy = null;
   async.waterfall([
     (next) => {
       accountDbo.getAccount({ deviceId },
@@ -310,8 +319,8 @@ let getBonusInfo = (req, res) => {
           ref: lodash.sum(lodash.map(refBonusesInfo, 'amount'))
         },
         referrals,
-        canClaim: new Date() > CLAIM_AFTER,
-        canClaimAfter: CLAIM_AFTER
+        canClaim: referredBy && new Date() > CLAIM_AFTER ? true : false,
+        canClaimAfter: referredBy ? CLAIM_AFTER : null
       });
     },
   ], (error, success) => {
