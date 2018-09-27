@@ -7,7 +7,9 @@ let sessionDbo = require('../dbos/session.dbo');
 let bonusHelper = require('../helpers/bonus.helper');
 let { CLAIM_AFTER,
   REF_BONUS,
-  SLC_BONUS } = require('../../config/referral');
+  SLC_BONUS,
+  FIVE_GB,
+  USAGE_BONUS } = require('../../config/referral');
 
 
 /**

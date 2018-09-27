@@ -57,26 +57,37 @@ let updateBonusInfo = (deviceId, txHash, cb) => {
       });
     });
 };
-
 let getTotalBonus = (cb) => {
-  BonusModel.aggregate([{
-    $group: {
-      _id: '$deviceId',
-      totalRefBonus: { $sum: { $sum: '$refBonusesInfo.amount' } },
-      totalSlcBonus: { $sum: { $sum: '$slcBonusesInfo.amount' } }
-    }
-  }, {
-    $project: {
-      total: { $sum: ['$totalRefBonus', '$totalSlcBonus'] }
-    }
-  }, {
-    $sort: {
-      total: -1
-    }
-  }]).exec((error, result) => {
-    if (error) cb(error, null);
-    else cb(null, result);
-  });
+  BonusModel.aggregate([
+    {
+      $project: {
+        _id: '$deviceId',
+        count: {
+          $size: '$refBonusesInfo'
+        },
+        refBonusesInfo: 1,
+        slcBonusesInfo: 1
+      }
+    }, {
+      $group: {
+        _id: '$_id',
+        totalRefBonus: { $sum: { $sum: '$refBonusesInfo.amount' } },
+        totalSlcBonus: { $sum: { $sum: '$slcBonusesInfo.amount' } },
+        count: { $sum: '$count' },
+      }
+    }, {
+      $project: {
+        total: { $sum: ['$totalRefBonus', '$totalSlcBonus'] },
+        count: 1
+      }
+    }, {
+      $sort: {
+        total: -1
+      }
+    }]).exec((error, result) => {
+      if (error) cb(error, null);
+      else cb(null, result);
+    });
 };
 
 module.exports = {

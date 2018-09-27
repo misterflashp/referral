@@ -1,9 +1,12 @@
+
+
 let async = require('async');
 let lodash = require('lodash');
 let accountDbo = require('../dbos/account.dbo');
 let bonusDbo = require('../dbos/bonus.dbo');
 let sessionDbo = require('../dbos/session.dbo');
-
+let { FIVE_GB,
+  USAGE_BONUS } = require('../../config/referral');
 
 /**
 * @api {get} /leaderboard To fetch leaderboard.
@@ -38,66 +41,54 @@ let getLeaderBoard = (req, res) => {
   let { sortBy,
     start,
     count,
-    order } = req.query;
+    order,
+    searchKey } = req.query;
   if (sortBy === 'bandwidth') sortBy = 'totalUsage';
-  else if (sortBy === 'referral') sortBy = 'noOfReferrals'
+  else if (sortBy === 'referral') sortBy = 'noOfReferrals';
   if (!sortBy) sortBy = 'tokens';
   if (!start) start = 0;
   if (!count) count = 1000000;
   if (!order) order = 'desc';
+  let searched = [];
   start = parseInt(start, 10);
   count = parseInt(count, 10);
   let end = start + count;
   async.waterfall([
     (next) => {
-      accountDbo.getAccounts({},
-        (error, accounts) => {
-          if (error) {
-            next({
-              status: 500,
-              message: 'Error while fetching accounts'
-            }, null);
-          } else next(null, accounts);
-        });
-    }, (accounts, next) => {
-      let order = -1;
-      accountDbo.getSortedAccountsByRefCount(order,
-        (error, refCounts) => {
-          if (error) {
-            next({
-              status: 500,
-              message: 'Error while fetching refCounts'
-            }, null);
-          } else next(null, accounts, refCounts);
-        });
+      accountDbo.getAccounts({}, (error, accounts) => {
+        if (error) {
+          next({
+            status: 500,
+            message: 'Error while fetching accounts'
+          }, null);
+        } else next(null, accounts);
+      });
     },
-    (accounts, refCounts, next) => {
+    (accounts, next) => {
       bonusDbo.getTotalBonus((error, bonuses) => {
         if (error) {
           next({
             status: 500,
             message: 'Error while fetching bonuses'
           }, null);
-        } else next(null, accounts, refCounts, bonuses);
+        } else next(null, accounts, bonuses);
       })
-    }, (accounts, refCounts, bonuses, next) => {
+    }, (accounts, bonuses, next) => {
       sessionDbo.getTotalUsage((error, usage) => {
         if (error) {
           next({
             status: 500,
             message: 'Error while fetching usage'
           }, null);
-        } else next(null, accounts, refCounts, bonuses, usage);
+        } else next(null, accounts, bonuses, usage);
       })
-    }, (accounts, refCounts, bonuses, usage, next) => {
+    }, (accounts, bonuses, usage, next) => {
       let tmpAccounts = {};
       let tmpBonus = {};
-      let tmpRef = {};
       let tmpUsage = {};
       let final = [];
       let tmpFinal = {};
       let final2 = [];
-      let index = 0;
       lodash.forEach(accounts,
         (account) => {
           tmpAccounts[account.deviceId] = account.referralId;
@@ -110,32 +101,25 @@ let getLeaderBoard = (req, res) => {
         (bonus) => {
           tmpBonus[bonus._id] = bonus;
         });
-      lodash.forEach(refCounts,
-        (ref) => {
-          tmpRef[ref._id] = ref.refsCount;
-        });
       lodash.forEach(bonuses,
         (bonus) => {
           tmpFinal[bonus._id] = bonus._id;
-          index++;
-          final.push({
-            [sortBy !== 'tokens' ? 'rank' : 'index']: index,
+          let obj = {
             deviceId: bonus._id,
             tokens: bonus.total,
             referralId: tmpAccounts[bonus._id],
-            noOfReferrals: bonus.count // (tmpRef[tmpAccounts[bonus._id]]) ? tmpRef[tmpAccounts[bonus._id]] : 0
-          });
+            noOfReferrals: bonus.count
+          }
+          final.push(obj);
         });
       lodash.forEach(accounts,
         (account) => {
           if (!tmpFinal[account.deviceId]) {
-            index++;
             final.push({
-              [sortBy != 'tokens' ? 'rank' : 'index']: index,
               deviceId: account.deviceId,
               tokens: 0,
               referralId: account.referralId,
-              noOfReferrals: tmpBonus[account.deviceId].count //(tmpRef[account.referralId]) ? tmpRef[account.referralId] : 0
+              noOfReferrals: 0
             });
           }
         });
@@ -146,7 +130,7 @@ let getLeaderBoard = (req, res) => {
               noOfSessions: tmpUsage[fin.deviceId].count,
               totalUsage: tmpUsage[fin.deviceId].down
             });
-            if (obj.totalUsage > 5 * 1024 * 1024 * 1024) obj['tokens'] += 1000 * Math.pow(10, 8);
+            if (obj.totalUsage > FIVE_GB) obj['tokens'] += USAGE_BONUS;
             final2.push(obj);
           } else {
             let obj = Object.assign(fin, {
@@ -159,15 +143,55 @@ let getLeaderBoard = (req, res) => {
       next(null, final2);
     },
     (final2, next) => {
-      final2 = lodash.orderBy(final2, [sortBy], [order])
-      let index = 1;
-      lodash.forEach(final2, (doc) => { doc.index = index++; });
-      final2 = final2.slice(start, end);
-      next(null, {
-        status: 200,
-        info: final2,
-        count: index
-      });
+      final2 = lodash.orderBy(final2, 'tokens', 'desc');
+      let index = 0;
+      lodash.forEach(final2,
+        (fin) => {
+          index++;
+          sortBy !== 'tokens' ? (fin.rank = index) : (fin.index = index);
+        });
+      next(null, final2);
+    },
+    (final2, next) => {
+      if (searchKey) {
+        searchKey = searchKey.toLowerCase();
+        lodash.forEach(final2,
+          (fin) => {
+            if ((fin.referralId).toLowerCase().indexOf(searchKey) > -1 ||
+              String((sortBy !== 'tokens' ? (fin.rank) : (fin.index))).indexOf(searchKey) > -1 ||
+              String((fin.tokens)).indexOf(searchKey) > -1 ||
+              String((fin.noOfReferrals)).indexOf(searchKey) > -1 ||
+              String((fin.totalUsage)).indexOf(searchKey) > -1 ||
+              String((fin.noOfSessions)).indexOf(searchKey) > -1
+            ) {
+              searched.push(fin);
+            }
+          });
+        next(null, final2);
+      } else next(null, final2);
+    },
+    (final2, next) => {
+      if (searchKey) {
+        let searched2 = lodash.orderBy(searched, [sortBy], [order]);
+        let searched3 = searched2.slice(start, end);
+        next(null, {
+          status: 200,
+          info: {
+            records: searched3,
+            count: searched2.length
+          }
+        });
+      } else {
+        final2 = lodash.orderBy(final2, [sortBy], [order])
+        let final3 = final2.slice(start, end);
+        next(null, {
+          status: 200,
+          info: {
+            records: final3,
+            count: final2.length
+          }
+        });
+      }
     }
   ], (error, success) => {
     let response = Object.assign({
@@ -178,6 +202,7 @@ let getLeaderBoard = (req, res) => {
     res.status(status).send(response);
   });
 }
+
 
 module.exports = {
   getLeaderBoard
