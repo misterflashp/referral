@@ -12,14 +12,14 @@ let addAccount = (details, cb) => {
 let getAccount = (findObject, cb) => {
   AccountModel.findOne(findObject, {
     '_id': 0
-  }, (error, account) => {
+  }, (error, result) => {
     if (error) cb(error, null);
-    else cb(null, account);
+    else cb(null, result);
   });
 };
 
-let getAccounts = (cb) => {
-  AccountModel.find({}, {
+let getAccounts = (findObj, cb) => {
+  AccountModel.find(findObj, {
     '_id': 0
   }, (error, accounts) => {
     if (error) cb(error, null);

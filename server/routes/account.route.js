@@ -3,12 +3,17 @@ let accountValidation = require('../validations/account.validation');
 
 
 module.exports = (server) => {
-  server.post('/account', accountValidation.addAccount, accountContoller.addAccount);
+  server.post('/accounts', accountValidation.addAccount, accountContoller.addAccount);
 
-  server.put('/account', accountValidation.updateAccount, accountContoller.updateAccount);
+  server.put('/accounts/:deviceId', accountValidation.updateAccount, accountContoller.updateAccount);
 
-  server.get('/account', accountValidation.getAccount, accountContoller.getAccount);
+  server.get('/accounts/:deviceId', accountValidation.getAccount, accountContoller.getAccount);
 
   server.get('/accounts', accountContoller.getAccounts);
 
+  server.post('/accounts/:deviceId/bonuses', accountValidation.addBonus, accountContoller.addBonus);
+
+  server.get('/accounts/:deviceId/bonuses', accountValidation.getBonuses, accountContoller.getBonuses);
+
+  server.post('/accounts/:deviceId/bonuses/claim', accountValidation.bonusClaim, accountContoller.bonusClaim);
 };

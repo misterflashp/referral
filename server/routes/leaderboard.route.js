@@ -1,7 +1,5 @@
-let LeaderboardController = require('../controllers/leaderboard.controller');
-module.exports = (server) => {
- 
-  
-  server.get('/leaderboard', LeaderboardController.getLeaderBoard);
+let leaderboardController = require('../controllers/leaderboard.controller');
 
+module.exports = (server) => {
+  server.get('/leaderboard', leaderboardController.getLeaderBoard);
 };
