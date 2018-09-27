@@ -20,7 +20,8 @@ let updateAccount = (req, res, next) => {
     deviceId: joi.string().required(),
     address: joi.string().regex(/^0x[a-fA-F0-9]{40}$/).required()
   });
-  let { error } = joi.validate(req.body.concat(req.params), updateAccountSchema);
+  let reqBody = Object.assign({}, req.body, req.params);
+  let { error } = joi.validate(reqBody, updateAccountSchema);
   if (error) res.status(422).send({
     success: false,
     error
