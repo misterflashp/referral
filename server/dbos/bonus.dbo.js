@@ -27,9 +27,9 @@ let getBonuses = (deviceId, cb) => {
     deviceId
   }, {
       '_id': 0
-    }, (error, bonuses) => {
+    }, (error, result) => {
       if (error) cb(error, null);
-      else cb(null, bonuses);
+      else cb(null, result);
     });
 };
 

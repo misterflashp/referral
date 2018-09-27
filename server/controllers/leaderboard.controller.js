@@ -35,18 +35,30 @@ let sessionDbo = require('../dbos/session.dbo');
    
 */
 let getLeaderBoard = (req, res) => {
-  let { sortBy } = req.query;
-  sortBy = (sortBy) ? sortBy : "tokens";
+  let { sortBy,
+    start,
+    count,
+    order } = req.query;
+  if (sortBy === 'bandwidth') sortBy = 'totalUsage';
+  else if (sortBy === 'referral') sortBy = 'noOfReferrals'
+  if (!sortBy) sortBy = 'tokens';
+  if (!start) start = 0;
+  if (!count) count = 1000000;
+  if (!order) order = 'desc';
+  start = parseInt(start, 10);
+  count = parseInt(count, 10);
+  let end = start + count;
   async.waterfall([
     (next) => {
-      accountDbo.getAccounts((error, accounts) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching accounts'
-          }, null);
-        } else next(null, accounts);
-      });
+      accountDbo.getAccounts({},
+        (error, accounts) => {
+          if (error) {
+            next({
+              status: 500,
+              message: 'Error while fetching accounts'
+            }, null);
+          } else next(null, accounts);
+        });
     }, (accounts, next) => {
       let order = -1;
       accountDbo.getSortedAccountsByRefCount(order,
@@ -102,105 +114,60 @@ let getLeaderBoard = (req, res) => {
         (ref) => {
           tmpRef[ref._id] = ref.refsCount;
         });
-      if (sortBy === 'bandwidth') {
-        lodash.forEach(usage,
-          (use) => {
-            index++;
-            tmpFinal[use._id] = use._id;
-            final.push({
-              rank:index,
-              referralId:tmpAccounts[use._id],
-              totalUsage: use.down
-            });
-          });
-          lodash.forEach(accounts,
-          (account)=>{
-            if (!tmpFinal[account.deviceId]) {
-              index++;
-              final.push({
-                rank: index,
-                referralId: account.referralId,
-                totalUsage: 0
-              });
-            }
-          });
-          next(null,{
-            status:200,
-            info:final
-          });
-      }else if(sortBy==='referral'){
-        lodash.forEach(refCounts,
-        (ref)=>{
+      lodash.forEach(bonuses,
+        (bonus) => {
+          tmpFinal[bonus._id] = bonus._id;
           index++;
-          tmpFinal[ref._id]=ref._id;
           final.push({
-            rank:index,
-            referralId:ref._id,
-            noOfReferrals: ref.refsCount
-          })
+            [sortBy !== 'tokens' ? 'rank' : 'index']: index,
+            deviceId: bonus._id,
+            tokens: bonus.total,
+            referralId: tmpAccounts[bonus._id],
+            noOfReferrals: bonus.count // (tmpRef[tmpAccounts[bonus._id]]) ? tmpRef[tmpAccounts[bonus._id]] : 0
+          });
         });
-        lodash.forEach(accounts,
-          (account)=>{
-            if (!tmpFinal[account.referralId]) {
-              index++;
-              final.push({
-                rank: index,
-                referralId: account.referralId,
-                noOfReferrals: 0
-              });
-            }
-          });
-          next(null,{
-            status:200,
-            info:final
-          });
-      }else {
-        lodash.forEach(bonuses,
-          (bonus) => {
-            tmpFinal[bonus._id] = bonus._id;
+      lodash.forEach(accounts,
+        (account) => {
+          if (!tmpFinal[account.deviceId]) {
             index++;
             final.push({
-              index: index,
-              deviceId: bonus._id,
-              tokens: bonus.total,
-              referralId: tmpAccounts[bonus._id],
-              noOfReferrals: (tmpRef[tmpAccounts[bonus._id]]) ? tmpRef[tmpAccounts[bonus._id]] : 0
+              [sortBy != 'tokens' ? 'rank' : 'index']: index,
+              deviceId: account.deviceId,
+              tokens: 0,
+              referralId: account.referralId,
+              noOfReferrals: tmpBonus[account.deviceId].count //(tmpRef[account.referralId]) ? tmpRef[account.referralId] : 0
             });
-          });
-        lodash.forEach(accounts,
-          (account) => {
-            if (!tmpFinal[account.deviceId]) {
-              index++;
-              final.push({
-                index: index,
-                deviceId: account.deviceId,
-                tokens: 0,
-                referralId: account.referralId,
-                noOfReferrals: (tmpRef[account.referralId]) ? tmpRef[account.referralId] : 0
-              });
-            }
-          });
-        lodash.forEach(final,
-          (fin) => {
-            if (tmpUsage[fin.deviceId]) {
-              let obj = Object.assign(fin, {
-                noOfSessions: tmpUsage[fin.deviceId].count,
-                totalUsage: tmpUsage[fin.deviceId].down
-              });
-              final2.push(obj);
-            } else {
-              let obj = Object.assign(fin, {
-                noOfSessions: 0,
-                totalUsage: 0
-              });
-              final2.push(obj);
-            }
-          });
-        next(null, {
-          status: 200,
-          info: final2
+          }
         });
-      } 
+      lodash.forEach(final,
+        (fin) => {
+          if (tmpUsage[fin.deviceId]) {
+            let obj = Object.assign(fin, {
+              noOfSessions: tmpUsage[fin.deviceId].count,
+              totalUsage: tmpUsage[fin.deviceId].down
+            });
+            if (obj.totalUsage > 5 * 1024 * 1024 * 1024) obj['tokens'] += 1000 * Math.pow(10, 8);
+            final2.push(obj);
+          } else {
+            let obj = Object.assign(fin, {
+              noOfSessions: 0,
+              totalUsage: 0
+            });
+            final2.push(obj);
+          }
+        });
+      next(null, final2);
+    },
+    (final2, next) => {
+      final2 = lodash.orderBy(final2, [sortBy], [order])
+      let index = 1;
+      lodash.forEach(final2, (doc) => { doc.index = index++; });
+      final2 = final2.slice(start, end);
+      next(null, {
+        status: 200,
+        info: final2,
+        count: index
+      });
     }
   ], (error, success) => {
     let response = Object.assign({
