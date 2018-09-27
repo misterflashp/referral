@@ -256,12 +256,12 @@ let updateAccount = (req, res) => {
 * @apiSuccessExample Response: 
 * {
 *   success: true,
-*   account: {
+*   accounts: [{
 *     deviceId: String,
 *     referralId: String,
 *     addedOn: Date,
 *     refs: []
-*   }
+*   }]
 * }
 */
 let getAccounts = (req, res) => {

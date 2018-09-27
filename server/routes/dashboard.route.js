@@ -6,6 +6,6 @@ module.exports = (server) => {
 
   server.get('/dashboard', dashboardValidation.getDashBoard, dashboardController.getDashBoard);
 
- // server.get('/dashboard/search',dashboardController.dashSearch);
+  server.post('/dashboard/search', dashboardValidation.dashSearch, dashboardController.dashSearch);
 
 };
