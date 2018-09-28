@@ -135,7 +135,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Response: ",
-          "content": "{\n  success: true,\n  account: {\n    deviceId: String,\n    referralId: String,\n    address: String,\n    referredBy: String,\n    addedOn: Date\n  }\n}",
+          "content": "{\n  success: true,\n  account: {\n    deviceId: String,\n    referralId: String,\n    address: String,\n    referredBy: String,\n    addedOn: Date,\n    linked: Bool\n  }\n}",
           "type": "json"
         }
       ]
