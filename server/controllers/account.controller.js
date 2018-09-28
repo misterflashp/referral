@@ -136,7 +136,8 @@ let addAccount = (req, res) => {
 *     referralId: String,
 *     address: String,
 *     referredBy: String,
-*     addedOn: Date
+*     addedOn: Date,
+*     linked: Bool
 *   }
 * }
 */
@@ -162,17 +163,33 @@ let getAccount = (req, res) => {
         (error, account) => {
           if (error) next({
             status: 500,
-            message: 'Error occurred while checking device Id.'
+            message: 'Error occurred while fetching account.'
           });
-          else if (account) next(null, {
-            status: 200,
-            account
-          });
+          else if (account) next(null, account);
           else next({
             status: 400,
             message: 'Device is not registered.'
           });
         });
+    }, (account, next) => {
+      if (type === 'address') {
+        linkedAccountDbo.getAccount(findObj,
+          (error, _account) => {
+            if (error) next({
+              status: 500,
+              message: 'Error occurred while fetching account.'
+            }); else {
+              account.linked = _account ? true : false;
+              next(null, {
+                status: 200,
+                account
+              });
+            }
+          });
+      } else nex(null, {
+        status: 200,
+        account
+      });
     }
   ], (error, success) => {
     let response = Object.assign({
