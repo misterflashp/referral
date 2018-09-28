@@ -22,6 +22,7 @@ let bonusSchema = new mongoose.Schema({
       onDate: Date,
     } */
   ],
+  txHash: String
 }, {
     strict: true,
     versionKey: false

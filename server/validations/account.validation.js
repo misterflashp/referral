@@ -31,7 +31,8 @@ let updateAccount = (req, res, next) => {
 
 let getAccount = (req, res, next) => {
   let getAccountSchema = joi.object().keys({
-    deviceId: joi.string().required()
+    type: joi.string().required(),
+    value: joi.string().required()
   });
   let { error } = joi.validate(req.params, getAccountSchema);
   if (error) res.status(422).send({
@@ -77,11 +78,28 @@ let bonusClaim = (req, res, next) => {
   else next();
 };
 
+let linkAccounts = (req, res, next) => {
+  let linkAccountsSchema = joi.object().keys({
+    sncRefId: joi.string().required(),
+    slcRefId: joi.string().required(),
+    deviceId: joi.string().required(),
+    address: joi.string().required()
+  });
+  let body = Object.assign({}, req.body, req.params);
+  let { error } = joi.validate(body, linkAccountsSchema);
+  if (error) res.status(422).send({
+    success: false,
+    error
+  });
+  else next();
+};
+
 module.exports = {
   addAccount,
   updateAccount,
   getAccount,
   addBonus,
   getBonuses,
-  bonusClaim
+  bonusClaim,
+  linkAccounts
 };

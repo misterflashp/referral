@@ -57,6 +57,7 @@ let updateBonusInfo = (deviceId, txHash, cb) => {
       });
     });
 };
+
 let getTotalBonus = (cb) => {
   BonusModel.aggregate([
     {

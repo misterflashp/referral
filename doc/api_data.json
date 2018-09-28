@@ -1,10 +1,10 @@
 [
   {
-    "type": "post",
-    "url": "/account",
+    "type": "POST",
+    "url": "/accounts",
     "title": "To add account.",
     "name": "addAccount",
-    "group": "Account",
+    "group": "Accounts",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -73,14 +73,14 @@
     },
     "version": "0.0.0",
     "filename": "server/controllers/account.controller.js",
-    "groupTitle": "Account"
+    "groupTitle": "Accounts"
   },
   {
-    "type": "get",
-    "url": "/account",
+    "type": "GET",
+    "url": "/accounts/:type/:value",
     "title": "To get account information.",
     "name": "getAccount",
-    "group": "Account",
+    "group": "Accounts",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -88,8 +88,15 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "deviceId",
-            "description": "<p>Device ID of client.</p>"
+            "field": "type",
+            "description": "<p>[deviceId || address]</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "value",
+            "description": "<p>deviceId or address based on type.</p>"
           }
         ]
       }
@@ -102,6 +109,12 @@
             "optional": false,
             "field": "DeviceNotRegistered",
             "description": "<p>Provided device ID not registered.</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "InvalidType",
+            "description": "<p>Provided type is invalid.</p>"
           }
         ]
       },
@@ -109,6 +122,11 @@
         {
           "title": "DeviceNotRegistered-Response:",
           "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "InvalidType-Response:",
+          "content": "{\n  success: false,\n  message: 'Invalid type.'\n}",
           "type": "json"
         }
       ]
@@ -124,14 +142,14 @@
     },
     "version": "0.0.0",
     "filename": "server/controllers/account.controller.js",
-    "groupTitle": "Account"
+    "groupTitle": "Accounts"
   },
   {
     "type": "get",
     "url": "/accounts",
     "title": "To get list of all accounts.",
     "name": "getAccount",
-    "group": "Account",
+    "group": "Accounts",
     "error": {
       "fields": {
         "Error 4xx": [
@@ -142,14 +160,7 @@
             "description": "<p>Error while fetching accounts.</p>"
           }
         ]
-      },
-      "examples": [
-        {
-          "title": "ErrorWhileFetchingAccounts-Response:",
-          "content": "{\n  success: false,\n  message: 'Error occoured while fetching accounts.'\n}",
-          "type": "json"
-        }
-      ]
+      }
     },
     "success": {
       "examples": [
@@ -162,14 +173,108 @@
     },
     "version": "0.0.0",
     "filename": "server/controllers/account.controller.js",
-    "groupTitle": "Account"
+    "groupTitle": "Accounts"
   },
   {
-    "type": "put",
-    "url": "/account",
+    "type": "POST",
+    "url": "/accounts/link/:sncRefId/:slcRefId",
+    "title": "To link the accounts.",
+    "name": "linkAccounts",
+    "group": "Accounts",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sncRefId",
+            "description": "<p>SNC referral ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "slcRefId",
+            "description": "<p>SLC referral ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "address",
+            "description": "<p>Etherem account address that is connected with sncRefId.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "deviceId",
+            "description": "<p>Device ID that is connected with slcRefId.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "InvalidRefAddressCombination",
+            "description": "<p>Provided sncrefId and address are invalid</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "InvalidRefDeviceIdCombination",
+            "description": "<p>Provided slcrefId and deviceId are invalid</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "DuplicateEntry",
+            "description": "<p>Provided fields are duplicate</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "InvalidRefAddressCombination-Response:",
+          "content": "{\n  success: false,\n  message: 'Invalid address and ref code combination.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "InvalidRefDeviceIdCombination-Response:",
+          "content": "{\n  success: false,\n  message: 'Invalid deviceId and ref code combination.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "DuplicateEntry-Response:",
+          "content": "{\n  success: false,\n  message: 'Duplicate values.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Response: ",
+          "content": "{\n  success: true,\n  message: 'Accounts linked successfully.'\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "server/controllers/account.controller.js",
+    "groupTitle": "Accounts"
+  },
+  {
+    "type": "PUT",
+    "url": "/accounts/:deviceId",
     "title": "To update account address.",
     "name": "updateAccount",
-    "group": "Account",
+    "group": "Accounts",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -202,12 +307,6 @@
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "AccountAddressAlreadyExists",
-            "description": "<p>Provided device ID already linked with an address.</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
             "field": "AddressAlreadyAssociatedWithOtherDevice",
             "description": "<p>Provided address already associated with another device.</p>"
           }
@@ -217,11 +316,6 @@
         {
           "title": "DeviceIdNotRegistered-Response:",
           "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
-          "type": "json"
-        },
-        {
-          "title": "AccountAddressAlreadyExists-Response:",
-          "content": "{\n  success: false,\n  message: 'Account address already exists.'\n}",
           "type": "json"
         },
         {
@@ -242,11 +336,11 @@
     },
     "version": "0.0.0",
     "filename": "server/controllers/account.controller.js",
-    "groupTitle": "Account"
+    "groupTitle": "Accounts"
   },
   {
-    "type": "get",
-    "url": "/bonus/claim",
+    "type": "POST",
+    "url": "/accounts/:deviceId/bonuses/claim",
     "title": "To claim bonus.",
     "name": "bonusClaim",
     "group": "Bonus",
@@ -258,7 +352,7 @@
             "type": "String",
             "optional": false,
             "field": "deviceId",
-            "description": "<p>Device ID of client.</p>"
+            "description": "<p>Device ID of linked account.</p>"
           }
         ]
       }
@@ -275,14 +369,8 @@
           {
             "group": "Error 4xx",
             "optional": false,
-            "field": "NoAccountAddressExists",
-            "description": "<p>No account address attached for provided deviceId.</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "BonusAlreadyClaimedOrNoBonusToClaim",
-            "description": "<p>Bonus already claimed OR no bonuses to claim.</p>"
+            "field": "CantClaimBonus",
+            "description": "<p>Not satisfying the bonus claim conditions</p>"
           }
         ]
       },
@@ -293,13 +381,8 @@
           "type": "json"
         },
         {
-          "title": "NoAccountAddressExists-Response:",
-          "content": "{\n  success: false,\n  message: 'No account address exists.'\n}",
-          "type": "json"
-        },
-        {
-          "title": "BonusAlreadyClaimedOrNoBonusToClaim-Response:",
-          "content": "{\n  success: false,\n  message: 'Bonus already claimed OR no bonuses to claim.'\n}",
+          "title": "CantClaimBonus-Response:",
+          "content": "{\n  success: false,\n  message: 'You can\\'t claim bonus.'\n}",
           "type": "json"
         }
       ]
@@ -314,14 +397,14 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "server/controllers/bonus.controller.js",
+    "filename": "server/controllers/account.controller.js",
     "groupTitle": "Bonus"
   },
   {
-    "type": "get",
-    "url": "/bonus/info",
+    "type": "GET",
+    "url": "/accounts/:deviceId/bonuses",
     "title": "To get bonus information.",
-    "name": "getBonusInfo",
+    "name": "getBonuses",
     "group": "Bonus",
     "parameter": {
       "fields": {
@@ -359,13 +442,13 @@
       "examples": [
         {
           "title": "Response: ",
-          "content": "{\n  success: true,\n  bonuses: {\n    snc: Number,\n    slc: Number,\n    ref: Number\n  },\n  refCount: Number,\n  canClaim: Boolean,\n  canClaimAfter: Date\n}",
+          "content": "{\n  success: true,\n  bonuses: {\n    slc: Number,\n    ref: Number,\n    other: Number\n  },\n  refCount: Number,\n  canClaim: Boolean,\n  canClaimAfter: Date\n}",
           "type": "json"
         }
       ]
     },
     "version": "0.0.0",
-    "filename": "server/controllers/bonus.controller.js",
+    "filename": "server/controllers/account.controller.js",
     "groupTitle": "Bonus"
   },
   {

@@ -13,9 +13,9 @@ let { CLAIM_AFTER,
 
 
 /**
-* @api {post} /account To add account.
+* @api {POST} /accounts To add account.
 * @apiName addAccount
-* @apiGroup Account
+* @apiGroup Accounts
 * @apiParam {String} deviceId Device ID of client.
 * @apiParam {String} address Account address of client.
 * @apiParam {String} referredBy Referral ID which is valid.
@@ -110,15 +110,22 @@ let addAccount = (req, res) => {
 };
 
 /**
-* @api {get} /account To get account information.
+* @api {GET} /accounts/:type/:value To get account information.
 * @apiName getAccount
-* @apiGroup Account
-* @apiParam {String} deviceId Device ID of client.
+* @apiGroup Accounts
+* @apiParam {String} type [deviceId || address]
+* @apiParam {String} value deviceId or address based on type.
 * @apiError DeviceNotRegistered Provided device ID not registered.
 * @apiErrorExample DeviceNotRegistered-Response:
 * {
 *   success: false,
 *   message: 'Device is not registered.'
+* }
+* @apiError InvalidType Provided type is invalid.
+* @apiErrorExample InvalidType-Response:
+* {
+*   success: false,
+*   message: 'Invalid type.'
 * }
 * @apiSuccessExample Response: 
 * {
@@ -133,10 +140,24 @@ let addAccount = (req, res) => {
 * }
 */
 let getAccount = (req, res) => {
-  let { deviceId } = req.params;
+  let {
+    type,
+    value
+  } = req.params;
+  let findObj = null;
   async.waterfall([
     (next) => {
-      accountDbo.getAccount({ deviceId },
+      if (type === 'deviceId') {
+        findObj = { deviceId: value };
+        next(null);
+      } else if (type === 'address') {
+        findObj = { address: value };
+      } else next({
+        status: 400,
+        message: 'Invalid type.'
+      });
+    }, (next) => {
+      accountDbo.getAccount(findObj,
         (error, account) => {
           if (error) next({
             status: 500,
@@ -163,9 +184,9 @@ let getAccount = (req, res) => {
 };
 
 /**
-* @api {put} /account To update account address.
+* @api {PUT} /accounts/:deviceId To update account address.
 * @apiName updateAccount
-* @apiGroup Account
+* @apiGroup Accounts
 * @apiParam {String} deviceId Device ID of client.
 * @apiParam {String} address Account address of client.
 * @apiError DeviceIdNotRegistered Provided device ID not registered.
@@ -173,12 +194,6 @@ let getAccount = (req, res) => {
 * {
 *   success: false,
 *   message: 'Device is not registered.'
-* }
-* @apiError AccountAddressAlreadyExists Provided device ID already linked with an address.
-* @apiErrorExample AccountAddressAlreadyExists-Response:
-* {
-*   success: false,
-*   message: 'Account address already exists.'
 * }
 * @apiError AddressAlreadyAssociatedWithOtherDevice Provided address already associated with another device.
 * @apiErrorExample AddressAlreadyAssociatedWithOtherDevice-Response:
@@ -248,13 +263,8 @@ let updateAccount = (req, res) => {
 /**
 * @api {get} /accounts To get list of all accounts.
 * @apiName getAccount
-* @apiGroup Account
+* @apiGroup Accounts
 * @apiError ErrorWhileFetchingAccounts Error while fetching accounts.
-* @apiErrorExample ErrorWhileFetchingAccounts-Response:
-* {
-*   success: false,
-*   message: 'Error occoured while fetching accounts.'
-* }
 * @apiSuccessExample Response: 
 * {
 *   success: true,
@@ -429,27 +439,21 @@ let addBonus = (req, res) => {
 };
 
 /**
-* @api {get} /bonus/claim To claim bonus.
+* @api {POST} /accounts/:deviceId/bonuses/claim To claim bonus.
 * @apiName bonusClaim
 * @apiGroup Bonus
-* @apiParam {String} deviceId Device ID of client.
+* @apiParam {String} deviceId Device ID of linked account.
 * @apiError DeviceNotRegistered Provided device ID not registered.
 * @apiErrorExample DeviceNotRegistered-Response:
 * {
 *   success: false,
 *   message: 'Device is not registered.'
 * }
-* @apiError NoAccountAddressExists No account address attached for provided deviceId. 
-* @apiErrorExample NoAccountAddressExists-Response:
+* @apiError CantClaimBonus Not satisfying the bonus claim conditions
+* @apiErrorExample CantClaimBonus-Response:
 * {
 *   success: false,
-*   message: 'No account address exists.'
-* }
-* @apiError BonusAlreadyClaimedOrNoBonusToClaim Bonus already claimed OR no bonuses to claim. 
-* @apiErrorExample BonusAlreadyClaimedOrNoBonusToClaim-Response:
-* {
-*   success: false,
-*   message: 'Bonus already claimed OR no bonuses to claim.'
+*   message: 'You can\'t claim bonus.'
 * }
 * @apiSuccessExample Response: 
 * {
@@ -458,17 +462,13 @@ let addBonus = (req, res) => {
 * }
 */
 let bonusClaim = (req, res) => {
-  let { deviceId } = req.body;
-  let address = null;
+  let { deviceId } = req.params;
+  let accountAddress = null;
   let referredBy = null;
+  let usage = null;
+  let txHash = null;
   async.waterfall([
     (next) => {
-      if (new Date() <= CLAIM_AFTER) next({
-        status: 400,
-        message: 'You can\'t claim bonus now.'
-      });
-      else next(null);
-    }, (next) => {
       accountDbo.getAccount({ deviceId },
         (error, account) => {
           if (error) next({
@@ -476,7 +476,7 @@ let bonusClaim = (req, res) => {
             message: 'Error occurred while fetching account.'
           });
           else if (account) {
-            address = account.address;
+            accountAddress = account.address;
             referredBy = account.referredBy;
             next(null);
           } else next({
@@ -485,17 +485,17 @@ let bonusClaim = (req, res) => {
           });
         });
     }, (next) => {
-      if (address) next(null);
-      else next({
-        status: 400,
-        message: 'No account address exists.'
-      });
-    }, (next) => {
-      if (referredBy) next(null);
-      else next({
-        status: 400,
-        message: 'No referred by exists.'
-      });
+      sessionDbo.getTotalUsageOf(deviceId,
+        (error, result) => {
+          if (error) next({
+            status: 500,
+            message: 'Error occurred while getting usage.'
+          });
+          else {
+            usage = result.length ? result[0].down : 0;
+            next(null);
+          }
+        })
     }, (next) => {
       bonusDbo.getBonuses(deviceId,
         (error, bonuses) => {
@@ -503,18 +503,25 @@ let bonusClaim = (req, res) => {
             status: 500,
             message: 'Error occurred while getting bonuses.'
           });
-          else next(null, bonuses);
+          else {
+            txHash = bonuses.txHash;
+            next(null, bonuses);
+          }
         });
+    }, (next) => {
+      if (txHash || !referredBy || !accountAddress || new Date() < CLAIM_AFTER) {
+        next({
+          status: 400,
+          message: 'You can\'t claim bonus.'
+        });
+      } else next(null);
     }, (bonuses, next) => {
       let { refBonusesInfo,
         slcBonusesInfo } = bonuses;
-      let amount = lodash.sum(lodash.map(refBonusesInfo.filter((e) => !e.txHash), 'amount'));
-      if (slcBonusesInfo.length && !slcBonusesInfo[0].txHash) amount += slcBonusesInfo[0].amount;
-      if (amount === 0) next({
-        status: 400,
-        message: 'No bonus amount to claim.'
-      });
-      else next(null, amount);
+      let amount = lodash.sum(lodash.map(refBonusesInfo, 'amount'));
+      if (slcBonusesInfo.length) amount += slcBonusesInfo[0].amount;
+      if (usage >= FIVE_GB) amount += USAGE_BONUS
+      next(null, amount);
     }, (amount, next) => {
       bonusHelper.transferBonus(address, amount,
         (error, txHash) => {
@@ -548,8 +555,8 @@ let bonusClaim = (req, res) => {
 };
 
 /**
-* @api {get} /bonus/info To get bonus information.
-* @apiName getBonusInfo
+* @api {GET} /accounts/:deviceId/bonuses To get bonus information.
+* @apiName getBonuses
 * @apiGroup Bonus
 * @apiParam {String} deviceId Device ID of client.
 * @apiError DeviceNotRegistered Provided device ID not registered.
@@ -562,9 +569,9 @@ let bonusClaim = (req, res) => {
 * {
 *   success: true,
 *   bonuses: {
-*     snc: Number,
 *     slc: Number,
-*     ref: Number
+*     ref: Number,
+*     other: Number
 *   },
 *   refCount: Number,
 *   canClaim: Boolean,
@@ -575,6 +582,7 @@ let getBonuses = (req, res) => {
   let { deviceId } = req.params;
   let referrals = [];
   let txHash = null;
+  let accountAddress = null;
   let referralId = null;
   let referredBy = null;
   let usage = null;
@@ -587,6 +595,7 @@ let getBonuses = (req, res) => {
             message: 'Error occurred while fetching account.'
           });
           else if (account) {
+            accountAddress = account.address;
             referralId = account.referralId;
             referredBy = account.referredBy;
             next(null);
@@ -637,13 +646,91 @@ let getBonuses = (req, res) => {
         bonuses: {
           slc: slcBonusesInfo.length ? slcBonusesInfo[0].amount : 0,
           ref: lodash.sum(lodash.map(refBonusesInfo, 'amount')),
-          other: usage > FIVE_GB ? USAGE_BONUS : 0
+          other: usage >= FIVE_GB ? USAGE_BONUS : 0
         },
         refCount: referrals.length,
-        canClaim: !txHash && referredBy && new Date() > CLAIM_AFTER ? true : false,
+        canClaim: !txHash && referredBy && accountAddress && new Date() > CLAIM_AFTER ? true : false,
         canClaimAfter: !txHash && referredBy ? CLAIM_AFTER : null
       });
     },
+  ], (error, success) => {
+    let response = Object.assign({
+      success: !error
+    }, error || success);
+    let status = response.status;
+    delete (response.status);
+    res.status(status).send(response);
+  });
+};
+
+/**
+* @api {POST} /accounts/link/:sncRefId/:slcRefId To link the accounts.
+* @apiName linkAccounts
+* @apiGroup Accounts
+* @apiParam {String} sncRefId SNC referral ID.
+* @apiParam {String} slcRefId SLC referral ID.
+* @apiParam {String} address Etherem account address that is connected with sncRefId.
+* @apiParam {String} deviceId Device ID that is connected with slcRefId.
+* @apiError InvalidRefAddressCombination Provided sncrefId and address are invalid
+* @apiErrorExample InvalidRefAddressCombination-Response:
+* {
+*   success: false,
+*   message: 'Invalid address and ref code combination.'
+* }
+* @apiError InvalidRefDeviceIdCombination Provided slcrefId and deviceId are invalid
+* @apiErrorExample InvalidRefDeviceIdCombination-Response:
+* {
+*   success: false,
+*   message: 'Invalid deviceId and ref code combination.'
+* }
+* @apiError DuplicateEntry Provided fields are duplicate
+* @apiErrorExample DuplicateEntry-Response:
+* {
+*   success: false,
+*   message: 'Duplicate values.'
+* }
+* @apiSuccessExample Response: 
+* {
+*   success: true,
+*   message: 'Accounts linked successfully.'
+* }
+*/
+let linkAccounts = (req, res) => {
+  let {
+    sncRefId,
+    slcRefId
+  } = req.params;
+  let {
+    deviceId,
+    address
+  } = req.body;
+  async.waterfall([
+    (next) => {
+      accountDbo.getAccount({ referralId: sncRefId, address },
+        (error, account) => {
+          if (error) next({
+            status: 500,
+            message: 'Error occurred while fetching account.'
+          }); else if (account) next(null);
+          else next({
+            status: 400,
+            message: 'Invalid address and ref code combination.'
+          })
+        });
+    }, (next) => {
+      accountDbo.getAccount({ referralId: slcRefId, deviceId },
+        (error, account) => {
+          if (error) next({
+            status: 500,
+            message: 'Error occurred while fetching account.'
+          }); else if (account) next(null);
+          else next({
+            status: 400,
+            message: 'Invalid deviceId and ref code combination.'
+          })
+        });
+    }, (next) => {
+    }
   ], (error, success) => {
     let response = Object.assign({
       success: !error
@@ -661,5 +748,6 @@ module.exports = {
   updateAccount,
   bonusClaim,
   getBonuses,
-  addBonus
+  addBonus,
+  linkAccounts
 };
