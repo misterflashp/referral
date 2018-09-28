@@ -1,6 +1,7 @@
 let async = require('async');
 let lodash = require('lodash');
 let accountDbo = require('../dbos/account.dbo');
+let linkedAccountDbo = require('../dbos/linkedAccount.dbo');
 let bonusDbo = require('../dbos/bonus.dbo');
 let accountHelper = require('../helpers/account.helper');
 let sessionDbo = require('../dbos/session.dbo');
@@ -730,6 +731,33 @@ let linkAccounts = (req, res) => {
           })
         });
     }, (next) => {
+      linkedAccountDbo.getAccount({
+        '$or': [
+          { sncRefId }, { slcrefId }, { deviceId }, { address }
+        ]
+      }, (error, account) => {
+        if (error) next({
+          status: 500,
+          message: 'Error occurred while fetching the account.'
+        });
+        else if (account) next({
+          status: 400,
+          message: 'Duplicate values.'
+        });
+        else next(null);
+      });
+    }, (next) => {
+      linkedAccountDbo.addAccount({ sncRefId, slcrefId, deviceId, address },
+        (error, result) => {
+          if (error) next({
+            status: 500,
+            message: 'Error occurred while linking account.'
+          });
+          else next({
+            status: 200,
+            message: 'Accounts linked successfully.'
+          });
+        });
     }
   ], (error, success) => {
     let response = Object.assign({

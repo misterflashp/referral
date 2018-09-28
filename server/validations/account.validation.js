@@ -83,7 +83,7 @@ let linkAccounts = (req, res, next) => {
     sncRefId: joi.string().required(),
     slcRefId: joi.string().required(),
     deviceId: joi.string().required(),
-    address: joi.string().required()
+    address: joi.string().regex(/^0x[a-fA-F0-9]{40}$/).required()
   });
   let body = Object.assign({}, req.body, req.params);
   let { error } = joi.validate(body, linkAccountsSchema);
