@@ -23,8 +23,7 @@ let linkedAccountSchema = new mongoose.Schema({
     required: true
   },
   txHash: {
-    type: String,
-    unique: true
+    type: String
   },
   addedOn: {
     type: Date,

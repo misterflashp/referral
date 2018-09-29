@@ -15,7 +15,7 @@ module.exports = (server) => {
 
   server.post('/accounts/:deviceId/bonuses', accountValidation.addBonus, accountContoller.addBonus);
 
-  server.get('/accounts/:deviceId/bonuses', accountValidation.getBonuses, accountContoller.getBonuses);
+  server.get('/accounts/:deviceId/bonuses/info', accountValidation.getBonuses, accountContoller.getBonuses);
 
   // server.post('/accounts/:deviceId/bonuses/claim', accountValidation.bonusClaim, accountContoller.bonusClaim);
 };

@@ -402,7 +402,7 @@
   },
   {
     "type": "GET",
-    "url": "/accounts/:deviceId/bonuses",
+    "url": "/accounts/:deviceId/bonuses/info",
     "title": "To get bonus information.",
     "name": "getBonuses",
     "group": "Bonus",
