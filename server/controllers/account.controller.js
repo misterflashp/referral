@@ -154,6 +154,7 @@ let getAccount = (req, res) => {
         next(null);
       } else if (type === 'address') {
         findObj = { address: value };
+        next(null);
       } else next({
         status: 400,
         message: 'Invalid type.'
@@ -186,7 +187,7 @@ let getAccount = (req, res) => {
               });
             }
           });
-      } else nex(null, {
+      } else next(null, {
         status: 200,
         account
       });
@@ -573,7 +574,7 @@ let bonusClaim = (req, res) => {
 };
 
 /**
-* @api {GET} /accounts/:deviceId/bonuses To get bonus information.
+* @api {GET} /accounts/:deviceId/bonuses/info To get bonus information.
 * @apiName getBonuses
 * @apiGroup Bonus
 * @apiParam {String} deviceId Device ID of client.
@@ -750,7 +751,7 @@ let linkAccounts = (req, res) => {
     }, (next) => {
       linkedAccountDbo.getAccount({
         '$or': [
-          { sncRefId }, { slcrefId }, { deviceId }, { address }
+          { sncRefId }, { slcRefId }, { deviceId }, { address }
         ]
       }, (error, account) => {
         if (error) next({
@@ -764,7 +765,7 @@ let linkAccounts = (req, res) => {
         else next(null);
       });
     }, (next) => {
-      linkedAccountDbo.addAccount({ sncRefId, slcrefId, deviceId, address },
+      linkedAccountDbo.addAccount({ sncRefId, slcRefId, deviceId, address },
         (error, result) => {
           if (error) next({
             status: 500,
