@@ -24,13 +24,22 @@ let { CLAIM_AFTER,
 * @apiErrorExample DeviceIdAlreadyExists-Response:
 * {
 *   success: false,
+*   errorCode: 1001,
 *   message: 'Device is already registered.'
 * }
 * @apiError ReferredByNotExists Provided referral ID not exists 
 * @apiErrorExample ReferredByNotExists-Response:
 * {
 *   success: false,
+*   errorCode: 1003,
 *   message: 'No account exists with referredBy.'
+* }
+* @apiError AddressAlreadyAssociatedWithOtherDevice Provided address already associated with another device.
+* @apiErrorExample AddressAlreadyAssociatedWithOtherDevice-Response:
+* {
+*   success: false,
+*   errorCode: 1002,
+*   message: 'Address already associated with another device.'
 * }
 * @apiSuccessExample Response: 
 * {
@@ -42,6 +51,7 @@ let addAccount = (req, res) => {
   let details = req.body;
   let { deviceId,
     referredBy } = details;
+  let address = (details.address).toLowerCase();
   async.waterfall([
     (next) => {
       accountDbo.getAccount({ deviceId },
@@ -52,7 +62,22 @@ let addAccount = (req, res) => {
           });
           else if (account) next({
             status: 400,
+            errorCode: 1001,
             message: 'Device is already registered.'
+          });
+          else next(null);
+        });
+    }, (next) => {
+      accountDbo.getAccount({ address },
+        (error, account) => {
+          if (error) next({
+            status: 500,
+            message: 'Error occurred while checking address.'
+          });
+          else if (account) next({
+            status: 400,
+            errorCode: 1002,
+            message: 'Address is already associated with other device.'
           });
           else next(null);
         });
@@ -68,6 +93,7 @@ let addAccount = (req, res) => {
           else if (account) next(null);
           else next({
             status: 400,
+            errorCode: 1003,
             message: 'No account exists with referredBy.'
           });
         });
@@ -120,12 +146,14 @@ let addAccount = (req, res) => {
 * @apiErrorExample DeviceNotRegistered-Response:
 * {
 *   success: false,
+*   errorCode: 1005,
 *   message: 'Device is not registered.'
 * }
 * @apiError InvalidType Provided type is invalid.
 * @apiErrorExample InvalidType-Response:
 * {
 *   success: false,
+*   errorCode: 1004,
 *   message: 'Invalid type.'
 * }
 * @apiSuccessExample Response: 
@@ -153,10 +181,12 @@ let getAccount = (req, res) => {
         findObj = { deviceId: value };
         next(null);
       } else if (type === 'address') {
+        value = value.toLowerCase();
         findObj = { address: value };
         next(null);
       } else next({
         status: 400,
+        errorCode: 1004,
         message: 'Invalid type.'
       });
     }, (next) => {
@@ -169,6 +199,7 @@ let getAccount = (req, res) => {
           else if (account) next(null, account);
           else next({
             status: 400,
+            errorCode: 1005,
             message: 'Device is not registered.'
           });
         });
@@ -212,12 +243,14 @@ let getAccount = (req, res) => {
 * @apiErrorExample DeviceIdNotRegistered-Response:
 * {
 *   success: false,
+*   errorCode: 1005,
 *   message: 'Device is not registered.'
 * }
 * @apiError AddressAlreadyAssociatedWithOtherDevice Provided address already associated with another device.
 * @apiErrorExample AddressAlreadyAssociatedWithOtherDevice-Response:
 * {
 *   success: false,
+*   errorCode: 1002,
 *   message: 'Address already associated with another device.'
 * }
 * @apiSuccessExample Response: 
@@ -229,6 +262,7 @@ let getAccount = (req, res) => {
 let updateAccount = (req, res) => {
   let { deviceId } = req.params;
   let { address } = req.body;
+  address = address.toLowerCase();
   async.waterfall([
     (next) => {
       accountDbo.getAccount({ deviceId },
@@ -240,6 +274,7 @@ let updateAccount = (req, res) => {
           else if (account) next(null);
           else next({
             status: 400,
+            errorCode: 1005,
             message: 'Device is not registered.'
           });
         });
@@ -252,6 +287,7 @@ let updateAccount = (req, res) => {
           });
           else if (account) next({
             status: 400,
+            errorCode: 1002,
             message: 'Address already associated with a device.'
           });
           else next(null);
@@ -398,6 +434,7 @@ let addBonus = (req, res) => {
             next(null);
           } else next({
             status: 400,
+            errorCode: 1005,
             message: 'Device is not registered.'
           });
         });
@@ -466,12 +503,14 @@ let addBonus = (req, res) => {
 * @apiErrorExample DeviceNotRegistered-Response:
 * {
 *   success: false,
+*   errorCode: 1005,
 *   message: 'Device is not registered.'
 * }
 * @apiError CantClaimBonus Not satisfying the bonus claim conditions
 * @apiErrorExample CantClaimBonus-Response:
 * {
 *   success: false,
+*   errorCode: 1006,
 *   message: 'You can\'t claim bonus.'
 * }
 * @apiSuccessExample Response: 
@@ -500,6 +539,7 @@ let bonusClaim = (req, res) => {
             next(null);
           } else next({
             status: 400,
+            errorCode: 1005,
             message: 'Device is not registered.'
           });
         });
@@ -531,6 +571,7 @@ let bonusClaim = (req, res) => {
       if (txHash || !referredBy || !accountAddress || new Date() < CLAIM_AFTER) {
         next({
           status: 400,
+          errorCode: 1006,
           message: 'You can\'t claim bonus.'
         });
       } else next(null);
@@ -582,6 +623,7 @@ let bonusClaim = (req, res) => {
 * @apiErrorExample DeviceNotRegistered-Response:
 * {
 *   success: false,
+*   errorCode: 1005,
 *   message: 'Device is not registered.'
 * }
 * @apiSuccessExample Response: 
@@ -620,6 +662,7 @@ let getBonuses = (req, res) => {
             next(null);
           } else next({
             status: 400,
+            errorCode: 1005,
             message: 'Device is not registered.'
           });
         });
@@ -694,18 +737,21 @@ let getBonuses = (req, res) => {
 * @apiErrorExample InvalidRefAddressCombination-Response:
 * {
 *   success: false,
+*   errorCode: 1007,
 *   message: 'Invalid address and ref code combination.'
 * }
 * @apiError InvalidRefDeviceIdCombination Provided slcrefId and deviceId are invalid
 * @apiErrorExample InvalidRefDeviceIdCombination-Response:
 * {
 *   success: false,
+*   errorCode: 1008,
 *   message: 'Invalid deviceId and ref code combination.'
 * }
 * @apiError DuplicateEntry Provided fields are duplicate
 * @apiErrorExample DuplicateEntry-Response:
 * {
 *   success: false,
+*   errorCode: 1009,
 *   message: 'Duplicate values.'
 * }
 * @apiSuccessExample Response: 
@@ -723,6 +769,7 @@ let linkAccounts = (req, res) => {
     deviceId,
     address
   } = req.body;
+  address = address.toLowerCase();
   async.waterfall([
     (next) => {
       accountDbo.getAccount({ referralId: sncRefId, address },
@@ -733,6 +780,7 @@ let linkAccounts = (req, res) => {
           }); else if (account) next(null);
           else next({
             status: 400,
+            errorCode: 1007,
             message: 'Invalid address and ref code combination.'
           })
         });
@@ -745,6 +793,7 @@ let linkAccounts = (req, res) => {
           }); else if (account) next(null);
           else next({
             status: 400,
+            errorCode: 1008,
             message: 'Invalid deviceId and ref code combination.'
           })
         });
@@ -760,6 +809,7 @@ let linkAccounts = (req, res) => {
         });
         else if (account) next({
           status: 400,
+          errorCode: 1009,
           message: 'Duplicate values.'
         });
         else next(null);

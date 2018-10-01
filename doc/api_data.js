@@ -46,18 +46,29 @@ define({ "api": [
             "optional": false,
             "field": "ReferredByNotExists",
             "description": "<p>Provided referral ID not exists</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AddressAlreadyAssociatedWithOtherDevice",
+            "description": "<p>Provided address already associated with another device.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "DeviceIdAlreadyExists-Response:",
-          "content": "{\n  success: false,\n  message: 'Device is already registered.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1001,\n  message: 'Device is already registered.'\n}",
           "type": "json"
         },
         {
           "title": "ReferredByNotExists-Response:",
-          "content": "{\n  success: false,\n  message: 'No account exists with referredBy.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1003,\n  message: 'No account exists with referredBy.'\n}",
+          "type": "json"
+        },
+        {
+          "title": "AddressAlreadyAssociatedWithOtherDevice-Response:",
+          "content": "{\n  success: false,\n  errorCode: 1002,\n  message: 'Address already associated with another device.'\n}",
           "type": "json"
         }
       ]
@@ -121,12 +132,12 @@ define({ "api": [
       "examples": [
         {
           "title": "DeviceNotRegistered-Response:",
-          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1005,\n  message: 'Device is not registered.'\n}",
           "type": "json"
         },
         {
           "title": "InvalidType-Response:",
-          "content": "{\n  success: false,\n  message: 'Invalid type.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1004,\n  message: 'Invalid type.'\n}",
           "type": "json"
         }
       ]
@@ -241,17 +252,17 @@ define({ "api": [
       "examples": [
         {
           "title": "InvalidRefAddressCombination-Response:",
-          "content": "{\n  success: false,\n  message: 'Invalid address and ref code combination.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1007,\n  message: 'Invalid address and ref code combination.'\n}",
           "type": "json"
         },
         {
           "title": "InvalidRefDeviceIdCombination-Response:",
-          "content": "{\n  success: false,\n  message: 'Invalid deviceId and ref code combination.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1008,\n  message: 'Invalid deviceId and ref code combination.'\n}",
           "type": "json"
         },
         {
           "title": "DuplicateEntry-Response:",
-          "content": "{\n  success: false,\n  message: 'Duplicate values.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1009,\n  message: 'Duplicate values.'\n}",
           "type": "json"
         }
       ]
@@ -315,12 +326,12 @@ define({ "api": [
       "examples": [
         {
           "title": "DeviceIdNotRegistered-Response:",
-          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1005,\n  message: 'Device is not registered.'\n}",
           "type": "json"
         },
         {
           "title": "AddressAlreadyAssociatedWithOtherDevice-Response:",
-          "content": "{\n  success: false,\n  message: 'Address already associated with another device.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1002,\n  message: 'Address already associated with another device.'\n}",
           "type": "json"
         }
       ]
@@ -377,12 +388,12 @@ define({ "api": [
       "examples": [
         {
           "title": "DeviceNotRegistered-Response:",
-          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1005,\n  message: 'Device is not registered.'\n}",
           "type": "json"
         },
         {
           "title": "CantClaimBonus-Response:",
-          "content": "{\n  success: false,\n  message: 'You can\\'t claim bonus.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1006,\n  message: 'You can\\'t claim bonus.'\n}",
           "type": "json"
         }
       ]
@@ -433,7 +444,7 @@ define({ "api": [
       "examples": [
         {
           "title": "DeviceNotRegistered-Response:",
-          "content": "{\n  success: false,\n  message: 'Device is not registered.'\n}",
+          "content": "{\n  success: false,\n  errorCode: 1005,\n  message: 'Device is not registered.'\n}",
           "type": "json"
         }
       ]
