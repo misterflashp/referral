@@ -50,8 +50,12 @@ let { CLAIM_AFTER,
 let addAccount = (req, res) => {
   let details = req.body;
   let { deviceId,
-    referredBy } = details;
-  let address = (details.address).toLowerCase();
+    referredBy,
+    address } = details;
+  if (address) {
+    details.address = details.address.toLowerCase();
+    address = address.toLowerCase();
+  }
   async.waterfall([
     (next) => {
       accountDbo.getAccount({ deviceId },
@@ -175,13 +179,13 @@ let getAccount = (req, res) => {
     value
   } = req.params;
   let findObj = null;
+  if (type === 'address') value = value.toLowerCase();
   async.waterfall([
     (next) => {
       if (type === 'deviceId') {
         findObj = { deviceId: value };
         next(null);
       } else if (type === 'address') {
-        value = value.toLowerCase();
         findObj = { address: value };
         next(null);
       } else next({
