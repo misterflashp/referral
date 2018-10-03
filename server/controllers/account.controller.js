@@ -209,6 +209,7 @@ let getAccount = (req, res) => {
         });
     }, (account, next) => {
       if (type === 'address') {
+        account = account.toObject();
         linkedAccountDbo.getAccount(findObj,
           (error, _account) => {
             if (error) next({
