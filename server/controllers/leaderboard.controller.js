@@ -54,34 +54,45 @@ let getLeaderBoard = (req, res) => {
   let end = start + count;
   async.waterfall([
     (next) => {
-      accountDbo.getAccounts({},
-        (error, accounts) => {
-          if (error) {
-            next({
-              status: 500,
-              message: 'Error while fetching accounts'
-            }, null);
-          } else next(null, accounts);
-        });
-    },
-    (accounts, next) => {
-      bonusDbo.getTotalBonus((error, bonuses) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching bonuses'
-          }, null);
-        } else next(null, accounts, bonuses);
-      })
-    }, (accounts, bonuses, next) => {
-      sessionDbo.getTotalUsage((error, usage) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching usage'
-          }, null);
-        } else next(null, accounts, bonuses, usage);
-      })
+      console.log('0', new Date());
+      async.parallel([
+        (callback) => {
+          accountDbo.getAccounts({},
+            (error, accounts) => {
+              console.log('1', new Date());
+              if (error) {
+                callback({
+                  status: 500,
+                  message: 'Error while fetching accounts'
+                });
+              } else callback(null, accounts);
+            });
+        }, (callback) => {
+          bonusDbo.getTotalBonus((error, bonuses) => {
+            console.log('2', new Date());
+            if (error) {
+              callback({
+                status: 500,
+                message: 'Error while fetching bonuses'
+              });
+            } else callback(null, bonuses);
+          });
+        }, (callback) => {
+          sessionDbo.getTotalUsage((error, usage) => {
+            console.log('3', new Date());
+            if (error) {
+              callback({
+                status: 500,
+                message: 'Error while fetching usage'
+              });
+            } else callback(null, usage);
+          });
+        }
+      ], (error, results) => {
+        console.log('4', new Date());
+        if (error) next(error);
+        else next(null, results[0], results[1], results[2]);
+      });
     }, (accounts, bonuses, usage, next) => {
       let tmpAccounts = {};
       let tmpBonus = {};
