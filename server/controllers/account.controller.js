@@ -72,19 +72,21 @@ let addAccount = (req, res) => {
           else next(null);
         });
     }, (next) => {
-      accountDbo.getAccount({ address },
-        (error, account) => {
-          if (error) next({
-            status: 500,
-            message: 'Error occurred while checking address.'
+      if (address) {
+        accountDbo.getAccount({ address },
+          (error, account) => {
+            if (error) next({
+              status: 500,
+              message: 'Error occurred while checking address.'
+            });
+            else if (account) next({
+              status: 400,
+              errorCode: 1002,
+              message: 'Address is already associated with other device.'
+            });
+            else next(null);
           });
-          else if (account) next({
-            status: 400,
-            errorCode: 1002,
-            message: 'Address is already associated with other device.'
-          });
-          else next(null);
-        });
+      } else next(null);
     }, (next) => {
       if (referredBy) {
         accountDbo.getAccount({

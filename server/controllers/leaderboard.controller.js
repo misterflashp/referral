@@ -25,10 +25,9 @@ let { FIVE_GB,
 *  "success": true,
 *  "info": [
 *    {
-*      "index":   00000000
-*      "deviceId": 0000000000000000,
+*      "index":   00000000,
 *      "tokens":   0000000000000000,
-*      "referralId": "SENT-XXXXXXXX"
+*      "referralId": "SENT-XXXXXXXX",
 *      "noOfReferrals": 00000000,
 *      "noOfSessions":  00000000,
 *      "totalUsage": XXXXXXXX (In bytes)
@@ -55,14 +54,15 @@ let getLeaderBoard = (req, res) => {
   let end = start + count;
   async.waterfall([
     (next) => {
-      accountDbo.getAccounts({}, (error, accounts) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching accounts'
-          }, null);
-        } else next(null, accounts);
-      });
+      accountDbo.getAccounts({},
+        (error, accounts) => {
+          if (error) {
+            next({
+              status: 500,
+              message: 'Error while fetching accounts'
+            }, null);
+          } else next(null, accounts);
+        });
     },
     (accounts, next) => {
       bonusDbo.getTotalBonus((error, bonuses) => {
@@ -149,10 +149,10 @@ let getLeaderBoard = (req, res) => {
         (fin) => {
           index++;
           sortBy !== 'tokens' ? (fin.rank = index) : (fin.index = index);
+          delete (fin.deviceId);
         });
       next(null, final2);
-    },
-    (final2, next) => {
+    }, (final2, next) => {
       if (searchKey) {
         searchKey = searchKey.toLowerCase();
         lodash.forEach(final2,
