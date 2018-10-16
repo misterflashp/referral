@@ -5,4 +5,6 @@ module.exports = {
   USAGE_BONUS: 1000 * Math.pow(10, 8),
   CLAIM_AFTER: new Date(Date.UTC(2018, 09, 07, 23, 59, 59, 999)),
   COINBASE_PRIVATE_KEY: '',
+  AIRDROP_END_DATE: new Date(Date.UTC(2018, 10, 08, 23, 59, 59, 999)),
+  LINK_END_DATE: new Date(Date.UTC(2018, 10, 16, 23, 59, 59, 999))
 };
