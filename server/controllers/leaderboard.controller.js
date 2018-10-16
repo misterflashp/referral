@@ -25,10 +25,9 @@ let { FIVE_GB,
 *  "success": true,
 *  "info": [
 *    {
-*      "index":   00000000
-*      "deviceId": 0000000000000000,
+*      "index":   00000000,
 *      "tokens":   0000000000000000,
-*      "referralId": "SENT-XXXXXXXX"
+*      "referralId": "SENT-XXXXXXXX",
 *      "noOfReferrals": 00000000,
 *      "noOfSessions":  00000000,
 *      "totalUsage": XXXXXXXX (In bytes)
@@ -55,33 +54,45 @@ let getLeaderBoard = (req, res) => {
   let end = start + count;
   async.waterfall([
     (next) => {
-      accountDbo.getAccounts({}, (error, accounts) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching accounts'
-          }, null);
-        } else next(null, accounts);
+      console.log('0', new Date());
+      async.parallel([
+        (callback) => {
+          accountDbo.getAccounts({},
+            (error, accounts) => {
+              console.log('1', new Date());
+              if (error) {
+                callback({
+                  status: 500,
+                  message: 'Error while fetching accounts'
+                });
+              } else callback(null, accounts);
+            });
+        }, (callback) => {
+          bonusDbo.getTotalBonus((error, bonuses) => {
+            console.log('2', new Date());
+            if (error) {
+              callback({
+                status: 500,
+                message: 'Error while fetching bonuses'
+              });
+            } else callback(null, bonuses);
+          });
+        }, (callback) => {
+          sessionDbo.getTotalUsage((error, usage) => {
+            console.log('3', new Date());
+            if (error) {
+              callback({
+                status: 500,
+                message: 'Error while fetching usage'
+              });
+            } else callback(null, usage);
+          });
+        }
+      ], (error, results) => {
+        console.log('4', new Date());
+        if (error) next(error);
+        else next(null, results[0], results[1], results[2]);
       });
-    },
-    (accounts, next) => {
-      bonusDbo.getTotalBonus((error, bonuses) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching bonuses'
-          }, null);
-        } else next(null, accounts, bonuses);
-      })
-    }, (accounts, bonuses, next) => {
-      sessionDbo.getTotalUsage((error, usage) => {
-        if (error) {
-          next({
-            status: 500,
-            message: 'Error while fetching usage'
-          }, null);
-        } else next(null, accounts, bonuses, usage);
-      })
     }, (accounts, bonuses, usage, next) => {
       let tmpAccounts = {};
       let tmpBonus = {};
@@ -149,10 +160,10 @@ let getLeaderBoard = (req, res) => {
         (fin) => {
           index++;
           sortBy !== 'tokens' ? (fin.rank = index) : (fin.index = index);
+          delete (fin.deviceId);
         });
       next(null, final2);
-    },
-    (final2, next) => {
+    }, (final2, next) => {
       if (searchKey) {
         searchKey = searchKey.toLowerCase();
         lodash.forEach(final2,

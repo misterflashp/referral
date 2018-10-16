@@ -9,7 +9,7 @@ module.exports = (server) => {
 
   server.get('/accounts/:type/:value', accountValidation.getAccount, accountContoller.getAccount);
 
-  server.get('/accounts', accountContoller.getAccounts);
+  // server.get('/accounts', accountContoller.getAccounts);
   
   server.post('/accounts/link/:sncRefId/:slcRefId', accountValidation.linkAccounts, accountContoller.linkAccounts);
 
