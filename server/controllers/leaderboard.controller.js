@@ -3,6 +3,7 @@
 let async = require('async');
 let lodash = require('lodash');
 let accountDbo = require('../dbos/account.dbo');
+let linkedAccountDbo = require('../dbos/linkedAccount.dbo');
 let bonusDbo = require('../dbos/bonus.dbo');
 let sessionDbo = require('../dbos/session.dbo');
 let { FIVE_GB,
@@ -54,12 +55,10 @@ let getLeaderBoard = (req, res) => {
   let end = start + count;
   async.waterfall([
     (next) => {
-      console.log('0', new Date());
       async.parallel([
         (callback) => {
           accountDbo.getAccounts({},
             (error, accounts) => {
-              console.log('1', new Date());
               if (error) {
                 callback({
                   status: 500,
@@ -69,7 +68,6 @@ let getLeaderBoard = (req, res) => {
             });
         }, (callback) => {
           bonusDbo.getTotalBonus((error, bonuses) => {
-            console.log('2', new Date());
             if (error) {
               callback({
                 status: 500,
@@ -79,7 +77,6 @@ let getLeaderBoard = (req, res) => {
           });
         }, (callback) => {
           sessionDbo.getTotalUsage((error, usage) => {
-            console.log('3', new Date());
             if (error) {
               callback({
                 status: 500,
@@ -89,7 +86,6 @@ let getLeaderBoard = (req, res) => {
           });
         }
       ], (error, results) => {
-        console.log('4', new Date());
         if (error) next(error);
         else next(null, results[0], results[1], results[2]);
       });
@@ -215,6 +211,78 @@ let getLeaderBoard = (req, res) => {
 }
 
 
+// let getNewLeaderBoard = (req, res) => {
+//   let accounts = {};
+//   let device_ids = [];
+//   let amounts = {};
+
+//   async.waterfall([
+//     (next) => {
+//       linkedAccountDbo.getLinkedAccounts(
+//         (error, linkedAccounts) => {
+//           if (error) {
+//             next({
+//               status: 500,
+//               message: 'Error while fetching accounts'
+//             }, null);
+//           } else next(null, linkedAccounts);
+//         });
+//     }, (linkedAccounts, next) => {
+//       lodash.forEach(linkedAccounts, (account) => {
+//         accounts[account['deviceId']] = account; //['account'][0];
+//         delete accounts[account['deviceId']._id];
+//         device_ids.push(account.deviceId);
+//       });
+//       sessionDbo.getRefSessions(device_ids, (error, refSessions) => {
+//         if (error) {
+//           next({
+//             status: 500,
+//             message: 'Error while fetching sessions'
+//           }, null);
+//         } else next(null, refSessions);
+//       });
+//     }, (refSessions, next) => {
+//       lodash.forEach(refSessions, (session) => {
+//         accounts[session['_id']]['usage'] = session['usage'];
+//         accounts[session['_id']]['refs'] = [];
+//       });
+//       lodash.forEach(device_ids, (deviceId) => {
+//         if (!accounts[deviceId].usage)
+//           delete accounts[deviceId];
+//       });
+//       device_ids = Object.keys(accounts);
+//       let referral_ids = {};
+//       lodash.forEach(device_ids, (deviceId) => {
+//         let account = accounts[deviceId];
+//         referral_ids[account['referralId']] = account['deviceId'];
+//       })
+
+//       lodash.forEach(device_ids, (deviceId) => {
+//         account = accounts[deviceId];
+//         if (account.referredBy && referral_ids[account['referredBy']]) {
+//           accounts[referral_ids[account['referredBy']]]['refs'] = deviceId;
+//         }
+//       });
+//       let totalAmount = 0;
+//       lodash.forEach(device_ids, (deviceId) => {
+//         let amount = 500 + (accounts[deviceId]['refs']).length * 100;
+//         if (accounts[deviceId]['usage'] >= FIVE_GB)
+//           amount = amount + 1000;
+//         amounts[accounts[deviceId]['referralId']] = amount;
+//         totalAmount = totalAmount + amount;
+//       });
+//     }
+//   ], (error, success) => {
+//     let response = Object.assign({
+//       success: !error
+//     }, error || success);
+//     let status = response.status;
+//     delete (response.status);
+//     res.status(status).send(response);
+//   });
+// }
+
 module.exports = {
-  getLeaderBoard
+  getLeaderBoard,
+  getNewLeaderBoard
 };
